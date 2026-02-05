@@ -4,10 +4,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
-public class UserController {
+public class AccountController {
 
     @GetMapping
-    public String getUsers() {
-        return "List users";
+    public String getAccount() {
+        return "List accounts";
     }
 }

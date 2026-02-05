@@ -1,0 +1,11 @@
+package vn.edu.fpt.dto.response;
+
+import lombok.*;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class MessageResponse {
+    private String message;
+}
