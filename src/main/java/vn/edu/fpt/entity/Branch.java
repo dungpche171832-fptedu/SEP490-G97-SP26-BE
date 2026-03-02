@@ -1,0 +1,48 @@
+package vn.edu.fpt.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.util.UUID;
+
+@Entity
+@Table(
+        name = "branch",
+        indexes = {
+                @Index(name = "idx_branch_code", columnList = "code"),
+                @Index(name = "idx_branch_manager_account", columnList = "manager_account_id")
+        }
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Branch extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
+    private UUID id;
+
+    @Column(nullable = false, unique = true, length = 50)
+    private String code;  // Mã chi nhánh
+
+    @Column(nullable = false, length = 100)
+    private String name;  // Tên chi nhánh
+
+    @Column(length = 255)
+    private String address;  // Địa chỉ chi nhánh
+
+    @Column(length = 20)
+    private String phone;  // Số điện thoại
+
+    @Column(length = 100)
+    private String email;  // Email chi nhánh
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;  // Trạng thái hoạt động
+
+    @ManyToOne
+    @JoinColumn(name = "manager_account_id", nullable = false)
+    private Account managerAccount;  // Tài khoản quản lý chi nhánh
+}
