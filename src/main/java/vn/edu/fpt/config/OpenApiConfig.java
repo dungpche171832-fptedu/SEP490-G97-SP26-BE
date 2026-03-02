@@ -13,17 +13,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "Clinic Management System API",
+                title = "Car Management System API",
                 version = "1.0",
-                description = "API quản lý phòng khám - Hệ thống đặt lịch khám, quản lý bệnh nhân, bác sĩ",
+                description = "API quản lý xe",
                 contact = @Contact(
-                        name = "G2 Team",
-                        email = "support@clinic.com"
+                        name = "SEP490_G97 Team"
                 )
         ),
         servers = {
                 @Server(url = "http://localhost:8080", description = "Local Server"),
-                @Server(url = "https://api.clinic.com", description = "Production Server")
         },
         security = @SecurityRequirement(name = "bearerAuth")
 )

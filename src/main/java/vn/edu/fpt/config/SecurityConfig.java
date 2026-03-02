@@ -57,7 +57,6 @@ public class SecurityConfig {
                                 "/api/auth/**"
                         ).permitAll()
 
-                        // ===== SWAGGER (BẮT BUỘC ĐỦ) =====
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
