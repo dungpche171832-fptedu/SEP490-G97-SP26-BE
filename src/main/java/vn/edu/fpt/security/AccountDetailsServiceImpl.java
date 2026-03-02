@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.entity.Account;
 import vn.edu.fpt.repository.AccountRepository;
+import vn.edu.fpt.dto.response.AccountResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -31,5 +32,22 @@ public class AccountDetailsServiceImpl implements UserDetailsService {
         }
 
         return AccountDetailsImpl.build(account);
+    }
+
+    // Phương thức để lấy thông tin tài khoản cá nhân
+    @Transactional(readOnly = true)
+    public AccountResponse getAccountInfoByEmail(String email) {
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("Account not found: " + email)
+                );
+
+        // Trả về DTO chứa thông tin tài khoản
+        return new AccountResponse(
+                account.getFullName(),
+                account.getEmail(),
+                account.getPhone(),
+                account.getPassword()
+        );
     }
 }
