@@ -14,8 +14,8 @@ import vn.edu.fpt.dto.response.LoginResponse;
 import vn.edu.fpt.dto.response.RefreshTokenResponse;
 import vn.edu.fpt.entity.Account;
 import vn.edu.fpt.entity.RefreshToken;
-import vn.edu.fpt.enums.AccountRole;
-import vn.edu.fpt.enums.AccountStatus;
+import vn.edu.fpt.ultis.enums.AccountRole;
+import vn.edu.fpt.ultis.enums.AccountStatus;
 import vn.edu.fpt.repository.AccountRepository;
 import vn.edu.fpt.security.JwtUtil;
 
@@ -35,14 +35,14 @@ public class AuthService {
 
                 Authentication authentication = authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
-                                request.getUsername(),
+                                request.getEmail(),
                                 request.getPassword()
                         )
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                Account account = accountRepository.findByUsername(request.getUsername())
+                Account account = accountRepository.findByEmail(request.getEmail())
                         .orElseThrow(() -> new RuntimeException("Account not found"));
 
                 String accessToken = jwtUtil.generateAccessToken(account);
@@ -51,7 +51,6 @@ public class AuthService {
 
                 LoginResponse.UserInfo userInfo = LoginResponse.UserInfo.builder()
                         .id(account.getAccountId())
-                        .username(account.getUsername())
                         .fullName(account.getFullName())
                         .role(account.getRole().name())
                         .branchId(account.getBranchId())
@@ -68,10 +67,6 @@ public class AuthService {
         @Transactional
         public void register(RegisterRequest request) {
 
-                if (accountRepository.existsByUsername(request.getUsername())) {
-                        throw new RuntimeException("Username đã tồn tại");
-                }
-
                 if (accountRepository.existsByEmail(request.getEmail())) {
                         throw new RuntimeException("Email đã tồn tại");
                 }
@@ -80,8 +75,7 @@ public class AuthService {
                         passwordEncoder.encode(request.getPassword());
 
                 Account account = Account.builder()
-                        .username(request.getUsername())
-                        .password(encodedPassword)   // ✅ BẮT BUỘC
+                        .password(encodedPassword)
                         .fullName(request.getFullName())
                         .email(request.getEmail())
                         .phone(request.getPhone())

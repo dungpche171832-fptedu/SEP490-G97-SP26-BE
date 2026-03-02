@@ -15,7 +15,6 @@ public class LoginResponse {
     @Builder
     public static class UserInfo {
         private Long id;
-        private String username;
         private String fullName;
         private String role;
         private Long branchId;

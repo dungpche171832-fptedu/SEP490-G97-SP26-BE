@@ -18,12 +18,12 @@ public class AccountDetailsServiceImpl implements UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String username)
+    public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
 
-        Account account = accountRepository.findByUsername(username)
+        Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("Account not found: " + username)
+                        new UsernameNotFoundException("Account not found: " + email)
                 );
 
         if (Boolean.FALSE.equals(account.getIsActive())) {

@@ -2,9 +2,8 @@ package vn.edu.fpt.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import vn.edu.fpt.entity.BaseEntity;
-import vn.edu.fpt.enums.AccountRole;
-import vn.edu.fpt.enums.AccountStatus;
+import vn.edu.fpt.ultis.enums.AccountRole;
+import vn.edu.fpt.ultis.enums.AccountStatus;
 
 @Entity
 @Table(
@@ -25,9 +24,6 @@ public class Account extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "account_id")
     private Long accountId;
-
-    @Column(nullable = false, unique = true, length = 50)
-    private String username;
 
     @Column(nullable = false, length = 255)
     private String password;

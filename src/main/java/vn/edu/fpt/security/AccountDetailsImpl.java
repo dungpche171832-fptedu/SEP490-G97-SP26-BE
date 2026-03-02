@@ -17,7 +17,6 @@ import java.util.List;
 public class AccountDetailsImpl implements UserDetails {
 
     private Long id;
-    private String username;
     private String email;
     private String password;
     private Boolean isActive;
@@ -35,7 +34,6 @@ public class AccountDetailsImpl implements UserDetails {
 
         return new AccountDetailsImpl(
                 account.getAccountId(),
-                account.getUsername(),
                 account.getEmail(),
                 account.getPassword(),
                 account.getIsActive(),
@@ -64,5 +62,11 @@ public class AccountDetailsImpl implements UserDetails {
     @Override
     public boolean isEnabled() {
         return Boolean.TRUE.equals(isActive);
+    }
+
+    // Phương thức getUsername() trả về email thay vì username
+    @Override
+    public String getUsername() {
+        return email;  // Trả về email để xác thực người dùng
     }
 }

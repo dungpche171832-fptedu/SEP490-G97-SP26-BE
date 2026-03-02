@@ -25,7 +25,6 @@ public class JwtUtil {
 
     public String generateAccessToken(Account account) {
         return Jwts.builder()
-                .subject(account.getUsername())
                 .claim("accountId", account.getAccountId())
                 .claim("role", account.getRole().name())
                 .issuedAt(new Date())
