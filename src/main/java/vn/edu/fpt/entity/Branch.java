@@ -20,9 +20,9 @@ import java.util.UUID;
 public class Branch extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private UUID id;
+    private long id;
 
     @Column(nullable = false, unique = true, length = 50)
     private String code;  // Mã chi nhánh

@@ -24,9 +24,9 @@ import java.util.UUID;
 public class Car extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private UUID id;
+    private long id;
 
     @Column(name = "license_plate", nullable = false, unique = true, length = 50)
     private String licensePlate;
