@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.entity.Account;
 import vn.edu.fpt.repository.AccountRepository;
-import vn.edu.fpt.dto.response.AccountResponse;
+import vn.edu.fpt.dto.response.account.AccountResponse;
 
 @Service
 @RequiredArgsConstructor
