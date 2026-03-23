@@ -1,9 +1,8 @@
 package vn.edu.fpt.repository;
 
-import vn.edu.fpt.entity.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import vn.edu.fpt.ultis.enums.AccountRole;
+import vn.edu.fpt.entity.Account;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,22 +12,15 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findByEmail(String email);
 
-    Optional<Account> findByPhone(String phoneNumber);
-
     Boolean existsByEmail(String email);
 
-    Boolean existsByPhone(String phoneNumber);
+    Boolean existsByPhone(String phone);
 
-    // Tìm kiếm theo roles và branchId
-    List<Account> findByRoleInAndBranchId(List<AccountRole> roles, Long branchId);
+    List<Account> findByRole_NameIn(List<String> roleNames);
 
-    // Tìm kiếm theo roles và email
-    List<Account> findByRoleInAndEmailContainingIgnoreCase(List<AccountRole> roles, String email);
+    List<Account> findByRole_NameInAndBranchId(List<String> roleNames, Long branchId);
 
-    // Tìm kiếm theo roles, branchId và email
-    List<Account> findByRoleInAndBranchIdAndEmailContainingIgnoreCase(List<AccountRole> roles, Long branchId, String email);
+    List<Account> findByRole_NameInAndEmailContainingIgnoreCase(List<String> roleNames, String email);
 
-    // Tìm kiếm theo chỉ role
-    List<Account> findByRoleIn(List<AccountRole> roles);
-
+    List<Account> findByRole_NameInAndBranchIdAndEmailContainingIgnoreCase(List<String> roleNames, Long branchId, String email);
 }

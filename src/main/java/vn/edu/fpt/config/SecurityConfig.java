@@ -67,7 +67,7 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // ===== ROLE BASED =====
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").permitAll()
                         .requestMatchers("/api/general-manager/**").hasRole("GENERAL_MANAGER")
                         .requestMatchers("/api/branch-manager/**").hasRole("BRANCH_MANAGER")
                         .requestMatchers("/api/staff/**").hasRole("STAFF")

@@ -2,14 +2,13 @@ package vn.edu.fpt.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import vn.edu.fpt.ultis.enums.AccountRole;
 import vn.edu.fpt.ultis.enums.AccountStatus;
 
 @Entity
 @Table(
         name = "account",
         indexes = {
-                @Index(name = "idx_account_role", columnList = "role"),
+                @Index(name = "idx_account_role", columnList = "role_id"),
                 @Index(name = "idx_account_branch", columnList = "branch_id")
         }
 )
@@ -37,9 +36,9 @@ public class Account extends BaseEntity {
     @Column(length = 20)
     private String phone;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
-    private AccountRole role;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     @Column(name = "branch_id")
     private Long branchId;

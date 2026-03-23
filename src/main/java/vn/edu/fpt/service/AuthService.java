@@ -14,10 +14,13 @@ import vn.edu.fpt.dto.response.LoginResponse;
 import vn.edu.fpt.dto.response.RefreshTokenResponse;
 import vn.edu.fpt.entity.Account;
 import vn.edu.fpt.entity.RefreshToken;
-import vn.edu.fpt.ultis.enums.AccountRole;
+import vn.edu.fpt.entity.Role;
+import vn.edu.fpt.exception.AppException;
+import vn.edu.fpt.repository.RoleRepository;
 import vn.edu.fpt.ultis.enums.AccountStatus;
 import vn.edu.fpt.repository.AccountRepository;
 import vn.edu.fpt.security.JwtUtil;
+import vn.edu.fpt.ultis.errorCode.AccountErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -28,22 +31,30 @@ public class AuthService {
         private final JwtUtil jwtUtil;
         private final RefreshTokenService refreshTokenService;
         private final PasswordEncoder passwordEncoder;
+        private final RoleRepository roleRepository;
 
-        // ================= LOGIN =================
         @Transactional
         public LoginResponse login(LoginRequest request) {
+                try {
+                        Authentication authentication = authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(
+                                        request.getEmail(),
+                                        request.getPassword()
+                                )
+                        );
 
-                Authentication authentication = authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                request.getEmail(),
-                                request.getPassword()
-                        )
-                );
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                } catch (org.springframework.security.core.AuthenticationException e) {
+                        throw new AppException(AccountErrorCode.ACCOUNT_INVALID);
+                }
 
                 Account account = accountRepository.findByEmail(request.getEmail())
-                        .orElseThrow(() -> new RuntimeException("Account not found"));
+                        .orElseThrow(() -> new AppException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+                if (!Boolean.TRUE.equals(account.getIsActive())) {
+                        throw new AppException(AccountErrorCode.ACCOUNT_NOT_ACTIVE);
+                }
 
                 String accessToken = jwtUtil.generateAccessToken(account);
                 RefreshToken refreshToken =
@@ -52,7 +63,7 @@ public class AuthService {
                 LoginResponse.UserInfo userInfo = LoginResponse.UserInfo.builder()
                         .id(account.getAccountId())
                         .fullName(account.getFullName())
-                        .role(account.getRole().name())
+                        .role(account.getRole().getName())
                         .branchId(account.getBranchId())
                         .build();
 
@@ -62,31 +73,34 @@ public class AuthService {
                         .user(userInfo)
                         .build();
         }
-
-        // ================= REGISTER =================
         @Transactional
         public void register(RegisterRequest request) {
 
                 if (accountRepository.existsByEmail(request.getEmail())) {
-                        throw new RuntimeException("Email đã tồn tại");
+                        throw new AppException(AccountErrorCode.EMAIL_ALREADY_EXISTS);
                 }
 
-                String encodedPassword =
-                        passwordEncoder.encode(request.getPassword());
+                if (accountRepository.existsByPhone(request.getPhone())) {
+                        throw new AppException(AccountErrorCode.PHONE_ALREADY_EXISTS);
+                }
+
+                String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+                Role customerRole = roleRepository.findByName("Customer")
+                        .orElseThrow(() -> new RuntimeException("Role Customer not found"));
 
                 Account account = Account.builder()
                         .password(encodedPassword)
                         .fullName(request.getFullName())
                         .email(request.getEmail())
                         .phone(request.getPhone())
-                        .role(AccountRole.CUSTOMER)
+                        .role(customerRole)
                         .status(AccountStatus.ACTIVE)
                         .build();
 
                 accountRepository.save(account);
         }
 
-        // ================= REFRESH TOKEN =================
         @Transactional
         public RefreshTokenResponse refreshToken(String refreshToken) {
 
@@ -102,5 +116,4 @@ public class AuthService {
                         .refreshToken(refreshToken)
                         .build();
         }
-
 }
