@@ -14,7 +14,8 @@ import vn.edu.fpt.dto.response.LoginResponse;
 import vn.edu.fpt.dto.response.RefreshTokenResponse;
 import vn.edu.fpt.entity.Account;
 import vn.edu.fpt.entity.RefreshToken;
-import vn.edu.fpt.ultis.enums.AccountRole;
+import vn.edu.fpt.entity.Role;
+import vn.edu.fpt.repository.RoleRepository;
 import vn.edu.fpt.ultis.enums.AccountStatus;
 import vn.edu.fpt.repository.AccountRepository;
 import vn.edu.fpt.security.JwtUtil;
@@ -28,8 +29,8 @@ public class AuthService {
         private final JwtUtil jwtUtil;
         private final RefreshTokenService refreshTokenService;
         private final PasswordEncoder passwordEncoder;
+        private final RoleRepository roleRepository;
 
-        // ================= LOGIN =================
         @Transactional
         public LoginResponse login(LoginRequest request) {
 
@@ -52,7 +53,7 @@ public class AuthService {
                 LoginResponse.UserInfo userInfo = LoginResponse.UserInfo.builder()
                         .id(account.getAccountId())
                         .fullName(account.getFullName())
-                        .role(account.getRole().name())
+                        .role(account.getRole().getName())
                         .branchId(account.getBranchId())
                         .build();
 
@@ -63,7 +64,6 @@ public class AuthService {
                         .build();
         }
 
-        // ================= REGISTER =================
         @Transactional
         public void register(RegisterRequest request) {
 
@@ -71,22 +71,23 @@ public class AuthService {
                         throw new RuntimeException("Email đã tồn tại");
                 }
 
-                String encodedPassword =
-                        passwordEncoder.encode(request.getPassword());
+                String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+                Role customerRole = roleRepository.findByName("Customer")
+                        .orElseThrow(() -> new RuntimeException("Role Customer not found"));
 
                 Account account = Account.builder()
                         .password(encodedPassword)
                         .fullName(request.getFullName())
                         .email(request.getEmail())
                         .phone(request.getPhone())
-                        .role(AccountRole.CUSTOMER)
+                        .role(customerRole)
                         .status(AccountStatus.ACTIVE)
                         .build();
 
                 accountRepository.save(account);
         }
 
-        // ================= REFRESH TOKEN =================
         @Transactional
         public RefreshTokenResponse refreshToken(String refreshToken) {
 
@@ -102,5 +103,4 @@ public class AuthService {
                         .refreshToken(refreshToken)
                         .build();
         }
-
 }

@@ -29,7 +29,7 @@ public class AccountDetailsImpl implements UserDetails {
 
         // Vì role là 1 ENUM trong bảng account
         List<GrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority("ROLE_" + account.getRole().name())
+                new SimpleGrantedAuthority("ROLE_" + account.getRole().getName())
         );
 
         return new AccountDetailsImpl(

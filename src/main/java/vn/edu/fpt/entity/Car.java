@@ -2,7 +2,6 @@ package vn.edu.fpt.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import vn.edu.fpt.ultis.enums.AccountRole;
 import vn.edu.fpt.ultis.enums.CarStatus;
 import vn.edu.fpt.ultis.enums.CarType;
 
