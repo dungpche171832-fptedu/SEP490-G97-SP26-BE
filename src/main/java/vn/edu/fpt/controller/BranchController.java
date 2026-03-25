@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.edu.fpt.dto.request.branch.AddBranchRequest;
+import vn.edu.fpt.dto.response.branch.AddBranchResponse;
 import vn.edu.fpt.dto.response.branch.BranchListResponse;
 import vn.edu.fpt.entity.Branch;
 import vn.edu.fpt.service.branch.BranchService;
@@ -18,13 +20,21 @@ public class BranchController {
     private BranchService branchService;
 
     @GetMapping
-    public ResponseEntity<BranchListResponse> getAllBranches() {
-        List<Branch> branches = branchService.getAllBranches();
+    public ResponseEntity<BranchListResponse> getBranches(
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String name
+    ) {
+        List<Branch> branches = branchService.getBranches(code, name);
 
-        if (branches.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new BranchListResponse(branches, "Không có chi nhánh nào", 0));
-        }
-
-        return ResponseEntity.ok(new BranchListResponse(branches, "Danh sách chi nhánh", branches.size()));
+        return ResponseEntity.ok(
+                new BranchListResponse(branches, "Danh sách chi nhánh", branches.size())
+        );
+    }
+    @PostMapping
+    public ResponseEntity<AddBranchResponse> addBranch(
+            @RequestBody AddBranchRequest request
+    ) {
+        AddBranchResponse response = branchService.addBranch(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
