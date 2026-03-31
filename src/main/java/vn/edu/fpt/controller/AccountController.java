@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.edu.fpt.dto.request.account.UpdateProfileRequest;
 import vn.edu.fpt.dto.response.account.AccountListResponse;
 import vn.edu.fpt.dto.response.account.AccountResponse;
 import vn.edu.fpt.entity.Account;
@@ -45,5 +46,12 @@ public class AccountController {
         return ResponseEntity.ok(
                 new AccountListResponse(accounts, "Danh sách tài khoản", accounts.size())
         );
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<AccountResponse> updateProfile(
+            @RequestBody UpdateProfileRequest request) {
+
+        return ResponseEntity.ok(accountService.updateProfile(request));
     }
 }
