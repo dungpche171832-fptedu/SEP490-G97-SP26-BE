@@ -19,6 +19,15 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  # ================= MAIL CONFIG =================
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: dungpche171832@fpt.edu.vn
+    password: oqoo brcv jmcy nayr
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 # ================= JWT CONFIG =================
 jwt:
