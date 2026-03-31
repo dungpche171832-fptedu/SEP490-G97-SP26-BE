@@ -6,9 +6,9 @@ spring:
     name: BE
 
   datasource:
-    url: jdbc:mysql://localhost:8000/sep490_g97
+    url: jdbc:mysql://localhost:3306/sep490_g97
     username: root
-    password: hungtrinh123
+    password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
