@@ -18,14 +18,21 @@ import vn.edu.fpt.entity.PasswordResetOtp;
 import vn.edu.fpt.entity.RefreshToken;
 import vn.edu.fpt.entity.Role;
 import vn.edu.fpt.exception.AppException;
+<<<<<<< HEAD
 import vn.edu.fpt.repository.PasswordResetOtpRepository;
 import vn.edu.fpt.repository.RoleRepository;
 import vn.edu.fpt.service.email.EmailService;
+=======
+import vn.edu.fpt.repository.RoleRepository;
+>>>>>>> 67646dda1be898d9206eb73bdebe02959ae8fff4
 import vn.edu.fpt.ultis.enums.AccountStatus;
 import vn.edu.fpt.repository.AccountRepository;
 import vn.edu.fpt.security.JwtUtil;
 import vn.edu.fpt.ultis.errorCode.AccountErrorCode;
+<<<<<<< HEAD
 import vn.edu.fpt.ultis.errorCode.AuthErrorCode;
+=======
+>>>>>>> 67646dda1be898d9206eb73bdebe02959ae8fff4
 
 @Service
 @RequiredArgsConstructor
@@ -37,8 +44,11 @@ public class AuthService {
         private final RefreshTokenService refreshTokenService;
         private final PasswordEncoder passwordEncoder;
         private final RoleRepository roleRepository;
+<<<<<<< HEAD
         private final PasswordResetOtpRepository otpRepository;
         private final EmailService emailService;
+=======
+>>>>>>> 67646dda1be898d9206eb73bdebe02959ae8fff4
 
         @Transactional
         public LoginResponse login(LoginRequest request) {
@@ -58,6 +68,13 @@ public class AuthService {
 
                 Account account = accountRepository.findByEmail(request.getEmail())
                         .orElseThrow(() -> new AppException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+<<<<<<< HEAD
+=======
+
+                if (!Boolean.TRUE.equals(account.getIsActive())) {
+                        throw new AppException(AccountErrorCode.ACCOUNT_NOT_ACTIVE);
+                }
+>>>>>>> 67646dda1be898d9206eb73bdebe02959ae8fff4
 
                 if (!Boolean.TRUE.equals(account.getIsActive())) {
                         throw new AppException(AccountErrorCode.ACCOUNT_NOT_ACTIVE);
@@ -122,6 +139,7 @@ public class AuthService {
                         .refreshToken(refreshToken)
                         .build();
         }
+<<<<<<< HEAD
         @Transactional
         public void forgotPassword(String email) {
 
@@ -200,4 +218,6 @@ public class AuthService {
                 accountRepository.save(account);
                 otpRepository.save(otpEntity);
         }
+=======
+>>>>>>> 67646dda1be898d9206eb73bdebe02959ae8fff4
 }

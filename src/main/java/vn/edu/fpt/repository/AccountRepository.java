@@ -1,9 +1,10 @@
 package vn.edu.fpt.repository;
 
-import vn.edu.fpt.entity.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import vn.edu.fpt.entity.Account;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -11,10 +12,15 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findByEmail(String email);
 
-    Optional<Account> findByPhone(String phoneNumber);
-
     Boolean existsByEmail(String email);
 
-    Boolean existsByPhone(String phoneNumber);
+    Boolean existsByPhone(String phone);
 
+    List<Account> findByRole_NameIn(List<String> roleNames);
+
+    List<Account> findByRole_NameInAndBranchId(List<String> roleNames, Long branchId);
+
+    List<Account> findByRole_NameInAndEmailContainingIgnoreCase(List<String> roleNames, String email);
+
+    List<Account> findByRole_NameInAndBranchIdAndEmailContainingIgnoreCase(List<String> roleNames, Long branchId, String email);
 }

@@ -50,6 +50,7 @@ public class AuthController {
         refreshTokenService.logoutByRefreshToken(request.getRefreshToken());
         return ResponseEntity.ok(new MessageResponse("Logout thành công"));
     }
+<<<<<<< HEAD
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request.getEmail());
@@ -61,4 +62,6 @@ public class AuthController {
         authService.resetPassword(request);
         return ResponseEntity.ok("Password updated");
     }
+=======
+>>>>>>> 67646dda1be898d9206eb73bdebe02959ae8fff4
 }

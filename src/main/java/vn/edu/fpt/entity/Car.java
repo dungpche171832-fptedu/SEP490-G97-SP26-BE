@@ -2,7 +2,6 @@ package vn.edu.fpt.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import vn.edu.fpt.ultis.enums.AccountRole;
 import vn.edu.fpt.ultis.enums.CarStatus;
 import vn.edu.fpt.ultis.enums.CarType;
 
@@ -24,9 +23,9 @@ import java.util.UUID;
 public class Car extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private UUID id;
+    private long id;
 
     @Column(name = "license_plate", nullable = false, unique = true, length = 50)
     private String licensePlate;

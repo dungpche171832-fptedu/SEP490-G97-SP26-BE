@@ -1,4 +1,4 @@
-package vn.edu.fpt.dto.response;
+package vn.edu.fpt.dto.response.account;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
