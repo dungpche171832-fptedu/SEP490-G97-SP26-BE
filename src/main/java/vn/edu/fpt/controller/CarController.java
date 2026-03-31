@@ -1,9 +1,12 @@
 package vn.edu.fpt.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.edu.fpt.dto.request.car.CarAddRequest;
+import vn.edu.fpt.dto.response.car.CarAddResponse;
 import vn.edu.fpt.dto.response.car.CarListResponse;
 import vn.edu.fpt.entity.Car;
 import vn.edu.fpt.service.car.CarService;
@@ -27,5 +30,10 @@ public class CarController {
         }
 
         return ResponseEntity.ok(new CarListResponse(cars, "Danh sách xe", cars.size()));
+    }
+
+    @PostMapping
+    public ResponseEntity<CarAddResponse> createCar(@Valid @RequestBody CarAddRequest request) {
+        return ResponseEntity.ok(carService.addCar(request));
     }
 }
