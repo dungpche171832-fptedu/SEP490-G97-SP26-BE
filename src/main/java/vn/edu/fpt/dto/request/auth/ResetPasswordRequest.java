@@ -1,0 +1,11 @@
+package vn.edu.fpt.dto.request.auth;
+
+import lombok.Data;
+
+@Data
+public class ResetPasswordRequest {
+    private String email;
+    private String otp;
+    private String newPassword;
+    private String confirmPassword;
+}

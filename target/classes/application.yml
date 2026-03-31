@@ -6,9 +6,9 @@ spring:
     name: BE
 
   datasource:
-    url: jdbc:mysql://localhost:3306/sep490_g97
+    url: jdbc:mysql://localhost:8000/sep490_g97
     username: root
-    password: 123456
+    password: hungtrinh123
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -19,6 +19,15 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  # ================= MAIL CONFIG =================
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: dungpche171832@fpt.edu.vn
+    password: oqoo brcv jmcy nayr
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 # ================= JWT CONFIG =================
 jwt:
