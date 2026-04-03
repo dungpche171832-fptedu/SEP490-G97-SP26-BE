@@ -82,6 +82,9 @@ public class AuthService {
         }
         @Transactional
         public void register(RegisterRequest request) {
+                if (!isValidPassword(request.getPassword())) {
+                        throw new AppException(AccountErrorCode.INVALID_NEW_PASSWORD);
+                }
 
                 if (accountRepository.existsByEmail(request.getEmail())) {
                         throw new AppException(AccountErrorCode.EMAIL_ALREADY_EXISTS);
@@ -174,6 +177,9 @@ public class AuthService {
                 if (!request.getNewPassword().equals(request.getConfirmPassword())) {
                         throw new AppException(AuthErrorCode.PASSWORD_NOT_MATCH);
                 }
+                if (!isValidPassword(request.getNewPassword())) {
+                        throw new AppException(AccountErrorCode.INVALID_NEW_PASSWORD);
+                }
 
                 PasswordResetOtp otpEntity = otpRepository
                         .findTopByEmailOrderByCreatedAtDesc(request.getEmail())
@@ -200,5 +206,8 @@ public class AuthService {
 
                 accountRepository.save(account);
                 otpRepository.save(otpEntity);
+        }
+        private boolean isValidPassword(String password) {
+                return password != null && password.matches("^(?=.*[A-Z]).{8,}$");
         }
 }
