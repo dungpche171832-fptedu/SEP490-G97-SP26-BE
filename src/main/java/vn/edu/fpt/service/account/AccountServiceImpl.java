@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.dto.request.account.UpdateProfileRequest;
+import vn.edu.fpt.dto.request.account.ChangePasswordRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import vn.edu.fpt.dto.response.account.AccountResponse;
 import vn.edu.fpt.entity.Account;
 import vn.edu.fpt.exception.AppException;
@@ -19,6 +21,8 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public List<Account> getAccountsByRoleAndFilter(List<String> roles, Long branchId, String email) {
@@ -92,5 +96,49 @@ public class AccountServiceImpl implements AccountService {
                 .email(account.getEmail())
                 .phone(account.getPhone())
                 .build();
+    }
+    @Override
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+
+        // 1. Lấy email từ token
+        Object principal = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        String email;
+
+        if (principal instanceof String) {
+            email = (String) principal;
+        } else {
+            throw new AppException(AccountErrorCode.ACCOUNT_NOT_FOUND);
+        }
+
+        // 2. Lấy account
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        // 3. Check confirm password
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new AppException(AccountErrorCode.NEW_PASSWORD_CONFIRM_NOT_MATCH);
+        }
+
+        // 4. Check mật khẩu mới
+        if (!isValidPassword(request.getNewPassword())) {
+            throw new AppException(AccountErrorCode.INVALID_NEW_PASSWORD);
+        }
+        // 5. Check mật khẩu hiện tại
+        if (!passwordEncoder.matches(request.getCurrentPassword(), account.getPassword())) {
+            throw new AppException(AccountErrorCode.INVALID_CURRENT_PASSWORD);
+        }
+
+        // 6. Encode mật khẩu mới
+        account.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        // 7. Save
+        accountRepository.save(account);
+    }
+    private boolean isValidPassword(String password) {
+        return password != null && password.matches("^(?=.*[A-Z]).{8,}$");
     }
 }
