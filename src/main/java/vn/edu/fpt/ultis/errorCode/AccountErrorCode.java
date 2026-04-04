@@ -13,6 +13,9 @@ public enum AccountErrorCode implements BaseErrorCode {
     ACCOUNT_NOT_FOUND(OK, "ACC-003", "Tài khoản không tồn tại", new HashMap<>()),
     EMAIL_ALREADY_EXISTS(OK, "ACC-004", "Email đã tồn tại", new HashMap<>()),
     PHONE_ALREADY_EXISTS(OK, "ACC-005", "Số điện thoại đã tồn tại", new HashMap<>()),
+    INVALID_CURRENT_PASSWORD(OK, "ACC-006", "Mật khẩu hiện tại không đúng", new HashMap<>()),
+    NEW_PASSWORD_CONFIRM_NOT_MATCH(OK, "ACC-007", "Xác nhận mật khẩu mới không khớp", new HashMap<>()),
+    INVALID_NEW_PASSWORD(OK, "ACC-008", "Mật khẩu mới không hợp lệ", new HashMap<>()),
     ;
     private final HttpStatusCode statusCode;
     private final String code; // Đảm bảo `code` là String
