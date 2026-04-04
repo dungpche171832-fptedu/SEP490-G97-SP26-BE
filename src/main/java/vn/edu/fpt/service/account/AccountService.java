@@ -7,7 +7,7 @@ import vn.edu.fpt.entity.Account;
 import java.util.List;
 
 public interface AccountService {
-    List<Account> getAccountsByRoleAndFilter(List<String> roles, Long branchId, String email);
+    List<Account> getAccounts(List<String> roles, Long branchId, String email);
 
     AccountResponse updateProfile(UpdateProfileRequest request);
 }

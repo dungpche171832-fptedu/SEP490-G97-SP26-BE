@@ -2,6 +2,7 @@ package vn.edu.fpt.service.account;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.dto.request.account.UpdateProfileRequest;
@@ -21,20 +22,42 @@ public class AccountServiceImpl implements AccountService {
     private AccountRepository accountRepository;
 
     @Override
-    public List<Account> getAccountsByRoleAndFilter(List<String> roles, Long branchId, String email) {
-        List<String> normalizedRoles = roles.stream()
-                .map(this::normalizeRoleName)
-                .toList();
+    public List<Account> getAccounts(List<String> roles, Long branchId, String email) {
 
-        if (branchId == null && (email == null || email.isEmpty())) {
-            return accountRepository.findByRole_NameIn(normalizedRoles);
-        } else if (branchId != null && (email == null || email.isEmpty())) {
-            return accountRepository.findByRole_NameInAndBranchId(normalizedRoles, branchId);
-        } else if (branchId != null) {
-            return accountRepository.findByRole_NameInAndBranchIdAndEmailContainingIgnoreCase(normalizedRoles, branchId, email);
-        } else {
-            return accountRepository.findByRole_NameInAndEmailContainingIgnoreCase(normalizedRoles, email);
+        Specification<Account> spec = (root, query, cb) -> cb.conjunction();
+
+        // role
+        if (roles != null && !roles.isEmpty()) {
+            List<String> normalizedRoles = roles.stream()
+                    .map(this::normalizeRoleName)
+                    .toList();
+
+            spec = spec.and((root, query, cb) ->
+                    root.get("role").get("name").in(normalizedRoles)
+            );
         }
+
+        // branch
+        if (branchId != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("branchId"), branchId)
+            );
+        }
+
+        // email
+        if (email != null && !email.isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("email")), "%" + email.toLowerCase() + "%")
+            );
+        }
+
+        List<Account> accounts = accountRepository.findAll(spec);
+
+        if (accounts.isEmpty()) {
+            throw new AppException(AccountErrorCode.ACCOUNT_NOT_FOUND);
+        }
+
+        return accounts;
     }
 
     private String normalizeRoleName(String role) {

@@ -31,17 +31,11 @@ public class AccountController {
 
     @GetMapping
     public ResponseEntity<AccountListResponse> getAccounts(
+            @RequestParam(required = false) List<String> roles,
             @RequestParam(required = false) Long branchId,
             @RequestParam(required = false) String email
     ) {
-        List<String> roles = Arrays.asList("Staff", "Manager", "Admin");
-
-        List<Account> accounts = accountService.getAccountsByRoleAndFilter(roles, branchId, email);
-
-        if (accounts.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .body(new AccountListResponse(accounts, "Không có tài khoản nào", 0));
-        }
+        List<Account> accounts = accountService.getAccounts(roles, branchId, email);
 
         return ResponseEntity.ok(
                 new AccountListResponse(accounts, "Danh sách tài khoản", accounts.size())
