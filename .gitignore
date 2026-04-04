@@ -1,0 +1,21 @@
+# Build
+target/
+build/
+
+# Compiled
+*.class
+
+# Package
+*.jar
+*.war
+
+# Logs
+*.log
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
