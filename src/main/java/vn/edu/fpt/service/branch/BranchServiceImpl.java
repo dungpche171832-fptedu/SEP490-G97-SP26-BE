@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.dto.request.branch.AddBranchRequest;
+import vn.edu.fpt.dto.response.branch.BranchViewResponse;
 import vn.edu.fpt.dto.response.branch.AddBranchResponse;
 import vn.edu.fpt.entity.Account;
 import vn.edu.fpt.entity.Branch;
@@ -77,6 +78,29 @@ public class BranchServiceImpl implements BranchService {
                 .email(saved.getEmail())
                 .isActive(saved.getIsActive())
                 .managerAccountId(saved.getManagerAccount().getAccountId())
+                .build();
+    }
+
+    @Override
+    public BranchViewResponse getBranchDetail(Long id) {
+
+        Branch branch = branchRepository.findById(id)
+                .orElseThrow(() -> new AppException(BranchErrorCode.BRANCH_NOT_FOUND));
+
+        if (!Boolean.TRUE.equals(branch.getIsActive())) {
+            throw new AppException(BranchErrorCode.BRANCH_NOT_ACTIVE);
+        }
+
+        return BranchViewResponse.builder()
+                .id(branch.getId())
+                .code(branch.getCode())
+                .name(branch.getName())
+                .address(branch.getAddress())
+                .phone(branch.getPhone())
+                .email(branch.getEmail())
+                .isActive(branch.getIsActive())
+                .managerId(branch.getManagerAccount().getAccountId())
+                .managerName(branch.getManagerAccount().getFullName())
                 .build();
     }
 }

@@ -1,9 +1,6 @@
 package vn.edu.fpt.controller;
 
-import vn.edu.fpt.dto.request.LoginRequest;
-import vn.edu.fpt.dto.request.LogoutRequest;
-import vn.edu.fpt.dto.request.RefreshTokenRequest;
-import vn.edu.fpt.dto.request.RegisterRequest;
+import vn.edu.fpt.dto.request.auth.*;
 import vn.edu.fpt.dto.response.LoginResponse;
 import vn.edu.fpt.dto.response.MessageResponse;
 import vn.edu.fpt.dto.response.RefreshTokenResponse;
@@ -52,5 +49,16 @@ public class AuthController {
     public ResponseEntity<MessageResponse> logout(@RequestBody LogoutRequest request) {
         refreshTokenService.logoutByRefreshToken(request.getRefreshToken());
         return ResponseEntity.ok(new MessageResponse("Logout thành công"));
+    }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request.getEmail());
+        return ResponseEntity.ok("OTP sent");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok("Password updated");
     }
 }

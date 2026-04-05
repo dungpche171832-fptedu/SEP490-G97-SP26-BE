@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.edu.fpt.dto.request.account.ChangePasswordRequest;
+import vn.edu.fpt.dto.request.account.UpdateProfileRequest;
 import vn.edu.fpt.dto.response.account.AccountListResponse;
 import vn.edu.fpt.dto.response.account.AccountResponse;
 import vn.edu.fpt.entity.Account;
@@ -30,20 +32,27 @@ public class AccountController {
 
     @GetMapping
     public ResponseEntity<AccountListResponse> getAccounts(
+            @RequestParam(required = false) List<String> roles,
             @RequestParam(required = false) Long branchId,
             @RequestParam(required = false) String email
     ) {
-        List<String> roles = Arrays.asList("Staff", "Manager", "Admin");
-
-        List<Account> accounts = accountService.getAccountsByRoleAndFilter(roles, branchId, email);
-
-        if (accounts.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .body(new AccountListResponse(accounts, "Không có tài khoản nào", 0));
-        }
+        List<Account> accounts = accountService.getAccounts(roles, branchId, email);
 
         return ResponseEntity.ok(
                 new AccountListResponse(accounts, "Danh sách tài khoản", accounts.size())
         );
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<AccountResponse> updateProfile(
+            @RequestBody UpdateProfileRequest request) {
+
+        return ResponseEntity.ok(accountService.updateProfile(request));
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
+        accountService.changePassword(request);
+        return ResponseEntity.ok("Đổi mật khẩu thành công");
     }
 }

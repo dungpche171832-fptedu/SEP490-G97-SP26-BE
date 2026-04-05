@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.dto.request.branch.AddBranchRequest;
+import vn.edu.fpt.dto.response.branch.BranchViewResponse;
 import vn.edu.fpt.dto.response.branch.AddBranchResponse;
 import vn.edu.fpt.dto.response.branch.BranchListResponse;
 import vn.edu.fpt.entity.Branch;
@@ -36,5 +37,10 @@ public class BranchController {
     ) {
         AddBranchResponse response = branchService.addBranch(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BranchViewResponse> getBranchDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(branchService.getBranchDetail(id));
     }
 }
