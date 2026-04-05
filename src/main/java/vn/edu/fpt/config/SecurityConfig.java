@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/branch-manager/**").hasRole("BRANCH_MANAGER")
                         .requestMatchers("/api/staff/**").hasRole("STAFF")
                         .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
-                        .requestMatchers("/api/cars/**").permitAll()
+
 
                         .anyRequest().authenticated()
                 )
