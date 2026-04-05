@@ -16,6 +16,9 @@ public enum AccountErrorCode implements BaseErrorCode {
     INVALID_CURRENT_PASSWORD(OK, "ACC-006", "Mật khẩu hiện tại không đúng", new HashMap<>()),
     NEW_PASSWORD_CONFIRM_NOT_MATCH(OK, "ACC-007", "Xác nhận mật khẩu mới không khớp", new HashMap<>()),
     INVALID_NEW_PASSWORD(OK, "ACC-008", "Mật khẩu mới không hợp lệ", new HashMap<>()),
+    FORBIDDEN_ACTION(OK, "ACC-009", "Bạn không có quyền thực hiện thao tác này", new HashMap<>()),
+    INVALID_ROLE(OK, "ACC-010", "Role không hợp lệ", new HashMap<>()),
+    ROLE_NOT_FOUND(OK, "ACC-011", "Role không tồn tại", new HashMap<>()),
     ;
     private final HttpStatusCode statusCode;
     private final String code; // Đảm bảo `code` là String
@@ -49,4 +52,3 @@ public enum AccountErrorCode implements BaseErrorCode {
         return result;
     }
 }
-

@@ -5,9 +5,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.dto.request.account.ChangePasswordRequest;
+import vn.edu.fpt.dto.request.account.CreateAccountRequest;
 import vn.edu.fpt.dto.request.account.UpdateProfileRequest;
 import vn.edu.fpt.dto.response.account.AccountListResponse;
 import vn.edu.fpt.dto.response.account.AccountResponse;
+import vn.edu.fpt.dto.response.account.CreateAccountResponse;
 import vn.edu.fpt.entity.Account;
 import vn.edu.fpt.security.AccountDetailsServiceImpl;
 import vn.edu.fpt.service.account.AccountService;
@@ -54,5 +56,12 @@ public class AccountController {
     public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
         accountService.changePassword(request);
         return ResponseEntity.ok("Đổi mật khẩu thành công");
+    }
+
+    @PostMapping("/admin/create-account")
+    public ResponseEntity<CreateAccountResponse> createAccount(
+            @RequestBody CreateAccountRequest request
+    ) {
+        return ResponseEntity.ok(accountService.createAccount(request));
     }
 }
