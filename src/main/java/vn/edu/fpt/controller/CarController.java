@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.dto.request.car.CarAddRequest;
 import vn.edu.fpt.dto.response.car.CarAddResponse;
 import vn.edu.fpt.dto.response.car.CarListResponse;
+import vn.edu.fpt.dto.response.car.CarViewResponse;
 import vn.edu.fpt.entity.Car;
 import vn.edu.fpt.service.car.CarService;
 
@@ -35,5 +36,11 @@ public class CarController {
     @PostMapping
     public ResponseEntity<CarAddResponse> createCar(@Valid @RequestBody CarAddRequest request) {
         return ResponseEntity.ok(carService.addCar(request));
+    }
+
+    @GetMapping("/cars/{carId}")
+    public ResponseEntity<CarViewResponse> getCarDetail(@PathVariable Long carId) {
+        CarViewResponse carViewResponse = carService.viewCar(carId);
+        return ResponseEntity.ok(carViewResponse);
     }
 }
