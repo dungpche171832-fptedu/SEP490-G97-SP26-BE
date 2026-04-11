@@ -227,7 +227,7 @@ public class AccountServiceImpl implements AccountService {
 
         // 5. Lấy role từ DB
         Role role = roleRepository.findByName(normalizedRole)
-                .orElseThrow(() -> new AppException(AccountErrorCode.ROLE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(AccountErrorCode.INVALID_ROLE));
 
 
         // 6. Validate password
