@@ -73,6 +73,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/staff/**").hasRole("STAFF")
                         .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
 
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.dto.request.car.CarAddRequest;
 import vn.edu.fpt.dto.response.car.CarAddResponse;
+import vn.edu.fpt.dto.response.car.CarViewResponse;
 import vn.edu.fpt.entity.Branch;
 import vn.edu.fpt.entity.Car;
 import vn.edu.fpt.exception.AppException;
@@ -77,6 +78,34 @@ public class CarServiceImpl implements CarService {
                 .status(savedCar.getStatus())
                 .manufactureYear(savedCar.getManufactureYear())
                 .description(savedCar.getDescription())
+                .build();
+    }
+
+    @Override
+    public CarViewResponse viewCar(Long carId) {
+
+        // Tìm kiếm xe theo ID. Nếu không tìm thấy, ném ra lỗi CAR_NOT_FOUND.
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new AppException(CarErrorCode.CAR_NOT_FOUND));
+
+        // Kiểm tra trạng thái xe, nếu không hoạt động, ném ra lỗi CAR_NOT_ACTIVE.
+        if (!Boolean.TRUE.equals(car.getIsActive())) {
+            throw new AppException(CarErrorCode.CAR_NOT_ACTIVE);
+        }
+
+        // Xây dựng đối tượng CarViewResponse để trả về chi tiết xe.
+        return CarViewResponse.builder()
+                .id(car.getId())
+                .licensePlate(car.getLicensePlate())
+                .branchName(car.getBranch().getName())
+                .branchCode(car.getBranch().getCode())
+                .branchEmail(car.getBranch().getEmail())
+                .carType(String.valueOf(car.getCarType()))
+                .totalSeat(car.getTotalSeat())
+                .status(String.valueOf(car.getStatus()))
+                .manufactureYear(car.getManufactureYear())
+                .description(car.getDescription())
+                .isActive(car.getIsActive())
                 .build();
     }
 }

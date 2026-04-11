@@ -15,6 +15,7 @@ public enum CarErrorCode implements BaseErrorCode {
     BRANCH_NOT_FOUND(OK, "CAR-003", "Chi nhánh không tồn tại", new HashMap<>()),
     INVALID_TOTAL_SEAT(OK, "CAR-004", "Số ghế không hợp lệ", new HashMap<>()),
     INVALID_MANUFACTURE_YEAR(OK, "CAR-005", "Năm sản xuất không hợp lệ", new HashMap<>()),
+    CAR_NOT_ACTIVE(OK, "CAR-006", "Xe không hoạt động", new HashMap<>()),
     ;
 
     private final HttpStatusCode statusCode;
