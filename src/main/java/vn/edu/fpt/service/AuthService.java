@@ -83,7 +83,7 @@ public class AuthService {
         @Transactional
         public void register(RegisterRequest request) {
                 if (!isValidPassword(request.getPassword())) {
-                        throw new AppException(AccountErrorCode.INVALID_NEW_PASSWORD);
+                        throw new AppException(AccountErrorCode.INVALID_PASSWORD);
                 }
 
                 if (accountRepository.existsByEmail(request.getEmail())) {
@@ -178,7 +178,7 @@ public class AuthService {
                         throw new AppException(AuthErrorCode.PASSWORD_NOT_MATCH);
                 }
                 if (!isValidPassword(request.getNewPassword())) {
-                        throw new AppException(AccountErrorCode.INVALID_NEW_PASSWORD);
+                        throw new AppException(AccountErrorCode.INVALID_PASSWORD);
                 }
 
                 PasswordResetOtp otpEntity = otpRepository

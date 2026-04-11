@@ -154,7 +154,7 @@ public class AccountServiceImpl implements AccountService {
 
         // 4. Check mật khẩu mới
         if (!isValidPassword(request.getNewPassword())) {
-            throw new AppException(AccountErrorCode.INVALID_NEW_PASSWORD);
+            throw new AppException(AccountErrorCode.INVALID_PASSWORD);
         }
         // 5. Check mật khẩu hiện tại
         if (!passwordEncoder.matches(request.getCurrentPassword(), account.getPassword())) {
