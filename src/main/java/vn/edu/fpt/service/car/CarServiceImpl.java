@@ -2,6 +2,7 @@ package vn.edu.fpt.service.car;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.dto.request.car.CarAddRequest;
 import vn.edu.fpt.dto.request.car.CarEditRequest;
@@ -27,8 +28,32 @@ public class CarServiceImpl implements CarService {
 
     // Triển khai phương thức lấy tất cả các xe
     @Override
-    public List<Car> getAllCars() {
-        return carRepository.findAll();  // Lấy tất cả các xe từ repository
+    public List<Car> getAllCars(Long branchId, String licensePlate) {
+
+        Specification<Car> spec = (root, query, cb) -> cb.conjunction();
+
+        if (branchId != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("branch").get("id"), branchId)
+            );
+        }
+
+        if (licensePlate != null && !licensePlate.isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(
+                            cb.lower(root.get("licensePlate")),
+                            "%" + licensePlate.trim().toLowerCase() + "%"
+                    )
+            );
+        }
+
+        List<Car> cars = carRepository.findAll(spec);
+
+        if (cars.isEmpty()) {
+            throw new AppException(CarErrorCode.CAR_NOT_FOUND);
+        }
+
+        return cars;
     }
 
     @Transactional

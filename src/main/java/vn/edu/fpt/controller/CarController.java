@@ -24,13 +24,11 @@ public class CarController {
 
     // Endpoint lấy danh sách tất cả các xe
     @GetMapping
-    public ResponseEntity<CarListResponse> getAllCars() {
-        List<Car> cars = carService.getAllCars();  // Lấy tất cả các xe từ service
-
-        if (cars.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new CarListResponse(cars, "Không có xe nào", 0));
-        }
-
+    public ResponseEntity<CarListResponse> getAllCars(
+            @RequestParam(required = false) Long branchId,
+            @RequestParam(required = false) String licensePlate
+    ) {
+        List<Car> cars = carService.getAllCars(branchId, licensePlate);
         return ResponseEntity.ok(new CarListResponse(cars, "Danh sách xe", cars.size()));
     }
 

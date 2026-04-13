@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface CarService {
     // Phương thức lấy tất cả các xe
-    List<Car> getAllCars();
+    List<Car> getAllCars(Long branchId, String licensePlate);
 
     // Thêm mới xe
     CarAddResponse addCar(CarAddRequest request);
