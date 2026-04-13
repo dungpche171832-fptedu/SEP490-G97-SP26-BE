@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.dto.request.car.CarAddRequest;
+import vn.edu.fpt.dto.request.car.CarEditRequest;
 import vn.edu.fpt.dto.response.car.CarAddResponse;
 import vn.edu.fpt.dto.response.car.CarListResponse;
 import vn.edu.fpt.dto.response.car.CarViewResponse;
@@ -42,5 +43,13 @@ public class CarController {
     public ResponseEntity<CarViewResponse> getCarDetail(@PathVariable Long carId) {
         CarViewResponse carViewResponse = carService.viewCar(carId);
         return ResponseEntity.ok(carViewResponse);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CarViewResponse> updateCar(
+            @PathVariable Long id,
+            @RequestBody CarEditRequest request
+    ) {
+        return ResponseEntity.ok(carService.editCar(id, request));
     }
 }

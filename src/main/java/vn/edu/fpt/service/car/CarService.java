@@ -1,6 +1,7 @@
 package vn.edu.fpt.service.car;
 
 import vn.edu.fpt.dto.request.car.CarAddRequest;
+import vn.edu.fpt.dto.request.car.CarEditRequest;
 import vn.edu.fpt.dto.response.car.CarAddResponse;
 import vn.edu.fpt.dto.response.car.CarViewResponse;
 import vn.edu.fpt.entity.Car;
@@ -15,6 +16,9 @@ public interface CarService {
     // Thêm mới xe
     CarAddResponse addCar(CarAddRequest request);
 
-    // Thêm mới xe
+    // Xem chi tiết xe
     CarViewResponse viewCar(Long carId);
+
+    // Sửa xe
+    CarViewResponse editCar(Long id, CarEditRequest request);
 }

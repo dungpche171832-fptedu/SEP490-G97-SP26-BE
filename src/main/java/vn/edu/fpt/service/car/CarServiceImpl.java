@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.dto.request.car.CarAddRequest;
+import vn.edu.fpt.dto.request.car.CarEditRequest;
 import vn.edu.fpt.dto.response.car.CarAddResponse;
 import vn.edu.fpt.dto.response.car.CarViewResponse;
 import vn.edu.fpt.entity.Branch;
@@ -11,6 +12,7 @@ import vn.edu.fpt.entity.Car;
 import vn.edu.fpt.exception.AppException;
 import vn.edu.fpt.repository.BranchRepository;
 import vn.edu.fpt.repository.CarRepository;
+import vn.edu.fpt.ultis.errorCode.BranchErrorCode;
 import vn.edu.fpt.ultis.errorCode.CarErrorCode;
 
 import java.util.List;
@@ -103,6 +105,70 @@ public class CarServiceImpl implements CarService {
                 .carType(String.valueOf(car.getCarType()))
                 .totalSeat(car.getTotalSeat())
                 .status(String.valueOf(car.getStatus()))
+                .manufactureYear(car.getManufactureYear())
+                .description(car.getDescription())
+                .isActive(car.getIsActive())
+                .build();
+    }
+
+    @Override
+    public CarViewResponse editCar(Long id, CarEditRequest request) {
+
+        Car car = carRepository.findById(id)
+                .orElseThrow(() -> new AppException(CarErrorCode.CAR_NOT_FOUND));
+
+        // Check branch nếu có update
+        if (request.getBranchId() != null) {
+            Branch branch = branchRepository.findById(request.getBranchId())
+                    .orElseThrow(() -> new AppException(BranchErrorCode.BRANCH_NOT_FOUND));
+
+            if (!Boolean.TRUE.equals(branch.getIsActive())) {
+                throw new AppException(BranchErrorCode.BRANCH_NOT_ACTIVE);
+            }
+
+            car.setBranch(branch);
+        }
+
+        // Update từng field (chỉ update nếu != null)
+        if (request.getLicensePlate() != null) {
+            car.setLicensePlate(request.getLicensePlate());
+        }
+
+        if (request.getCarType() != null) {
+            car.setCarType(request.getCarType());
+        }
+
+        if (request.getTotalSeat() != null) {
+            car.setTotalSeat(request.getTotalSeat());
+        }
+
+        if (request.getStatus() != null) {
+            car.setStatus(request.getStatus());
+        }
+
+        if (request.getManufactureYear() != null) {
+            car.setManufactureYear(request.getManufactureYear());
+        }
+
+        if (request.getDescription() != null) {
+            car.setDescription(request.getDescription());
+        }
+
+        if (request.getIsActive() != null) {
+            car.setIsActive(request.getIsActive());
+        }
+
+        carRepository.save(car);
+
+        return CarViewResponse.builder()
+                .id(car.getId())
+                .licensePlate(car.getLicensePlate())
+                .branchName(car.getBranch().getName())
+                .branchCode(car.getBranch().getCode())
+                .branchEmail(car.getBranch().getEmail())
+                .carType(car.getCarType().name())
+                .totalSeat(car.getTotalSeat())
+                .status(car.getStatus().name())
                 .manufactureYear(car.getManufactureYear())
                 .description(car.getDescription())
                 .isActive(car.getIsActive())
