@@ -13,6 +13,8 @@ public enum BranchErrorCode implements BaseErrorCode {
     BRANCH_LIST_EMPTY(OK, "BR-003", "Không có chi nhánh nào", new HashMap<>()),
     BRANCH_NOT_ACTIVE(OK, "BR-004", "Chi nhánh không hoạt động", new HashMap<>()),
     BRANCH_NOT_FOUND(OK, "BR-005", "Chi nhánh không tồn tại", new HashMap<>()),
+    BRANCH_PHONE_ALREADY_EXISTS(OK, "BR-006", "Số điện thoại chi nhánh đã tồn tại", new HashMap<>()),
+    BRANCH_EMAIL_ALREADY_EXISTS(OK, "BR-001", "Email chi nhánh đã tồn tại", new HashMap<>()),
     ;
     private final HttpStatusCode statusCode;
     private final String code; // Đảm bảo `code` là String

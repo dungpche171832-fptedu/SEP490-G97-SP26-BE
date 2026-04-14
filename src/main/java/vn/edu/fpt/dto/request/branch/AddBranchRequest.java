@@ -10,5 +10,11 @@ public class AddBranchRequest {
     private String phone;
     private String email;
     private Boolean isActive;
-    private Long managerAccountId;
+
+    // Thêm thông tin cho Account
+    private String managerFullName;
+    private String managerEmail;
+    private String managerPhone;
+    private String managerPassword;
+    private Long roleId;  // Role cho account quản lý
 }

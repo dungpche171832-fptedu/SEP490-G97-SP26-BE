@@ -23,4 +23,6 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
 
     Optional<Branch> findByCode(String code);
     boolean existsByCode(String code);
+    boolean existsByEmail(String email);
+    boolean existsByPhone(String phone);
 }
