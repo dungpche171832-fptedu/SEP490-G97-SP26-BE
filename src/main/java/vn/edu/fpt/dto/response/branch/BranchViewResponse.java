@@ -14,7 +14,4 @@ public class BranchViewResponse {
     private String phone;
     private String email;
     private Boolean isActive;
-
-    private Long managerId;
-    private String managerName;
 }

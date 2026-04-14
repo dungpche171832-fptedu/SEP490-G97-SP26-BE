@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.dto.request.branch.AddBranchRequest;
+import vn.edu.fpt.dto.request.branch.BranchEditRequest;
+import vn.edu.fpt.dto.response.branch.BranchEditResponse;
 import vn.edu.fpt.dto.response.branch.BranchViewResponse;
 import vn.edu.fpt.dto.response.branch.AddBranchResponse;
 import vn.edu.fpt.dto.response.branch.BranchListResponse;
@@ -42,5 +44,14 @@ public class BranchController {
     @GetMapping("/{id}")
     public ResponseEntity<BranchViewResponse> getBranchDetail(@PathVariable Long id) {
         return ResponseEntity.ok(branchService.getBranchDetail(id));
+    }
+
+    @PutMapping("/{branchId}")
+    public ResponseEntity<BranchEditResponse> editBranch(
+            @PathVariable Long branchId,
+            @RequestBody BranchEditRequest request
+    ) {
+        BranchEditResponse response = branchService.editBranch(branchId, request);
+        return ResponseEntity.ok(response);
     }
 }

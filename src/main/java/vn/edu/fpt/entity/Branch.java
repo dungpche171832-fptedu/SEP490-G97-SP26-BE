@@ -41,8 +41,4 @@ public class Branch extends BaseEntity {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;  // Trạng thái hoạt động
-
-    @ManyToOne
-    @JoinColumn(name = "manager_account_id", nullable = false)
-    private Account managerAccount;  // Tài khoản quản lý chi nhánh
 }
