@@ -161,12 +161,18 @@ public class AccountServiceImpl implements AccountService {
             throw new AppException(AccountErrorCode.INVALID_CURRENT_PASSWORD);
         }
 
-        // 6. Encode mật khẩu mới
+        // 6. Check mật khẩu mới không được trùng mật khẩu cũ
+        if (passwordEncoder.matches(request.getNewPassword(), account.getPassword())) {
+            throw new AppException(AccountErrorCode.NEW_PASSWORD_MUST_BE_DIFFERENT);
+        }
+
+        // 7. Encode mật khẩu mới
         account.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
-        // 7. Save
+        // 8. Save
         accountRepository.save(account);
     }
+
     private boolean isValidPassword(String password) {
         return password != null && password.matches("^(?=.*[A-Z]).{8,}$");
     }

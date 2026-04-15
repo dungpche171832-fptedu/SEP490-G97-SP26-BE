@@ -21,6 +21,7 @@ public enum AccountErrorCode implements BaseErrorCode {
     FORBIDDEN_ACTION(OK, "ACC-010", "Bạn không có quyền thao tác chức năng này", new HashMap<>()),
     INVALID_NEW_PASSWORD(OK, "ACC-011", "Mật khẩu mới không hợp lệ", new HashMap<>()),
     ROLE_NOT_FOUND(OK, "ACC-012", "Role không hợp lệ", new HashMap<>()),
+    NEW_PASSWORD_MUST_BE_DIFFERENT(OK, "ACC-013", "Mật khẩu mới trùng với mật khẩu hiện tại", new HashMap<>()),
     ;
     private final HttpStatusCode statusCode;
     private final String code; // Đảm bảo `code` là String
