@@ -238,7 +238,7 @@ public class AccountServiceImpl implements AccountService {
 
         // 6. Validate password
         if (request.getPassword() == null || request.getPassword().length() < 6) {
-            throw new AppException(AccountErrorCode.INVALID_NEW_PASSWORD);
+            throw new AppException(AccountErrorCode.INVALID_PASSWORD);
         }
 
         // 7. Encode password
