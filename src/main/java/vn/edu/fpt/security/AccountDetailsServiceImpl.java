@@ -46,7 +46,9 @@ public class AccountDetailsServiceImpl implements UserDetailsService {
         return new AccountResponse(
                 account.getFullName(),
                 account.getEmail(),
-                account.getPhone()
+                account.getPhone(),
+                account.getRole().getRoleId(),
+                account.getBranchId()
         );
     }
 }
