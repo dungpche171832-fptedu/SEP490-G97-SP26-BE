@@ -9,7 +9,6 @@ import java.util.UUID;
         name = "branch",
         indexes = {
                 @Index(name = "idx_branch_code", columnList = "code"),
-                @Index(name = "idx_branch_manager_account", columnList = "manager_account_id")
         }
 )
 @Getter

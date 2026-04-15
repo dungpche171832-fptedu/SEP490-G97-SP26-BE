@@ -10,7 +10,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>G2</groupId>
+    <groupId>SEP490-G97</groupId>
     <artifactId>BE</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>BE</name>
