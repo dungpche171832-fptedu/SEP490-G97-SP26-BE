@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.dto.request.plan.AddPlanRequest;
 import vn.edu.fpt.dto.request.planStation.PlanStationRequest;
+import vn.edu.fpt.dto.response.plan.PlanDetailResponse;
 import vn.edu.fpt.dto.response.plan.PlanListItemResponse;
 import vn.edu.fpt.dto.response.plan.PlanListResponse;
 import vn.edu.fpt.dto.response.plan.PlanResponse;
@@ -231,6 +232,49 @@ public class PlanServiceImpl implements PlanService {
                 .endTime(plan.getEndTime())
                 .status(plan.getStatus())
                 .stations(stationResponses)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PlanDetailResponse getPlanDetail(Long planId) {
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
+
+        return mapToPlanDetailResponse(plan);
+    }
+
+    private PlanDetailResponse mapToPlanDetailResponse(Plan plan) {
+        List<PlanStationResponse> stationResponses = plan.getPlanStations().stream()
+                .sorted((a, b) -> Integer.compare(a.getStationOrder(), b.getStationOrder()))
+                .map(planStation -> PlanStationResponse.builder()
+                        .stationId(planStation.getStation().getId())
+                        .stationName(planStation.getStation().getName())
+                        .stationOrder(planStation.getStationOrder())
+                        .build())
+                .toList();
+
+        List<PlanSeatResponse> seatResponses = plan.getPlanSeats().stream()
+                .sorted((a, b) -> Long.compare(a.getSeat().getId(), b.getSeat().getId()))
+                .map(planSeat -> PlanSeatResponse.builder()
+                        .seatId(planSeat.getSeat().getId())
+                        .seatNumber(planSeat.getSeat().getSeatNumber())
+                        .status(planSeat.getStatus().name())
+                        .build())
+                .toList();
+
+        return PlanDetailResponse.builder()
+                .id(plan.getId())
+                .code(plan.getCode())
+                .carId(plan.getCar().getId())
+                .carLicensePlate(plan.getCar().getLicensePlate())
+                .accountId(plan.getAccount().getAccountId())
+                .driverName(plan.getAccount().getFullName())
+                .startTime(plan.getStartTime())
+                .endTime(plan.getEndTime())
+                .status(plan.getStatus())
+                .stations(stationResponses)
+                .seats(seatResponses)
                 .build();
     }
 }
