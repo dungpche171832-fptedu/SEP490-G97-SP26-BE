@@ -16,7 +16,7 @@ public enum AccountErrorCode implements BaseErrorCode {
     PHONE_ALREADY_EXISTS(OK, "ACC-005", "Số điện thoại đã tồn tại", new HashMap<>()),
     INVALID_CURRENT_PASSWORD(OK, "ACC-006", "Mật khẩu hiện tại không đúng", new HashMap<>()),
     NEW_PASSWORD_CONFIRM_NOT_MATCH(OK, "ACC-007", "Xác nhận mật khẩu mới không khớp", new HashMap<>()),
-    INVALID_PASSWORD(OK, "ACC-008", "Mật khẩu không hợp lệ", new HashMap<>()),
+    INVALID_PASSWORD(OK, "ACC-008", "Mật khẩu không hợp lệ, phải có ít nhất 8 ký tự và 1 chữ cái hoa", new HashMap<>()),
     INVALID_ROLE(OK, "ACC-009", "Vai trò không hợp lệ", new HashMap<>()),
     FORBIDDEN_ACTION(OK, "ACC-010", "Bạn không có quyền thao tác chức năng này", new HashMap<>()),
 //    INVALID_NEW_PASSWORD(OK, "ACC-011", "Mật khẩu mới không hợp lệ", new HashMap<>()),
