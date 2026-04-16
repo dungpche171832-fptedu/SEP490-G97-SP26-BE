@@ -1,8 +1,10 @@
 package vn.edu.fpt.service.station;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.dto.request.station.AddStationRequest;
+import vn.edu.fpt.dto.response.station.StationListResponse;
 import vn.edu.fpt.dto.response.station.StationResponse;
 import vn.edu.fpt.entity.City;
 import vn.edu.fpt.entity.Station;
@@ -11,6 +13,12 @@ import vn.edu.fpt.repository.CityRepository;
 import vn.edu.fpt.repository.StationRepository;
 import vn.edu.fpt.service.station.StationServiceImpl;
 import vn.edu.fpt.ultis.errorCode.StationErrorCode;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -84,6 +92,70 @@ public class StationServiceImpl implements StationService {
                 .longitude(station.getLongitude())
                 .address(station.getAddress())
                 .cityName(city.getName())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public StationListResponse getStations(String name, String code, Long cityId) {
+        Specification<Station> spec = (root, query, cb) -> cb.conjunction();
+
+        if (name != null && !name.isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("name")), "%" + name.trim().toLowerCase() + "%")
+            );
+        }
+
+        if (code != null && !code.isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("code")), "%" + code.trim().toLowerCase() + "%")
+            );
+        }
+
+        if (cityId != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("city").get("id"), cityId)
+            );
+        }
+
+        List<Station> stations = stationRepository.findAll(spec);
+
+        if (stations.isEmpty()) {
+            throw new AppException(StationErrorCode.STATION_NOT_FOUND);
+        }
+
+        List<StationResponse> stationResponses = stations.stream()
+                .map(this::mapToResponse)
+                .toList();
+
+        return StationListResponse.builder()
+                .stations(stationResponses)
+                .message("Danh sách station")
+                .totalCount(stationResponses.size())
+                .build();
+    }
+
+    private void validateCoordinate(java.math.BigDecimal latitude, java.math.BigDecimal longitude) {
+        if (latitude.compareTo(java.math.BigDecimal.valueOf(-90)) < 0
+                || latitude.compareTo(java.math.BigDecimal.valueOf(90)) > 0) {
+            throw new AppException(StationErrorCode.INVALID_LATITUDE);
+        }
+
+        if (longitude.compareTo(java.math.BigDecimal.valueOf(-180)) < 0
+                || longitude.compareTo(java.math.BigDecimal.valueOf(180)) > 0) {
+            throw new AppException(StationErrorCode.INVALID_LONGITUDE);
+        }
+    }
+
+    private StationResponse mapToResponse(Station station) {
+        return StationResponse.builder()
+                .id(station.getId())
+                .name(station.getName())
+                .code(station.getCode())
+                .latitude(station.getLatitude())
+                .longitude(station.getLongitude())
+                .address(station.getAddress())
+                .cityName(station.getCity() != null ? station.getCity().getName() : null)
                 .build();
     }
 }
