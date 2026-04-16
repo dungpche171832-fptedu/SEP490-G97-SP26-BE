@@ -11,6 +11,7 @@ import java.util.List;
 @Table(
         name = "plan",
         indexes = {
+                @Index(name = "idx_plan_code", columnList = "code"),
                 @Index(name = "idx_plan_car", columnList = "car_id"),
                 @Index(name = "idx_plan_account", columnList = "account_id"),
                 @Index(name = "idx_plan_status", columnList = "status")
@@ -27,6 +28,9 @@ public class Plan extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private long id;
+
+    @Column(name = "code", nullable = false, unique = true, length = 50)
+    private String code;
 
     @ManyToOne
     @JoinColumn(name = "car_id", nullable = false)

@@ -13,6 +13,9 @@ import java.util.List;
 @Builder
 public class AddPlanRequest {
 
+    @NotBlank
+    private String code;
+
     @NotNull
     private Long carId;
 

@@ -2,10 +2,13 @@ package vn.edu.fpt.service.plan;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.dto.request.plan.AddPlanRequest;
 import vn.edu.fpt.dto.request.planStation.PlanStationRequest;
+import vn.edu.fpt.dto.response.plan.PlanListItemResponse;
+import vn.edu.fpt.dto.response.plan.PlanListResponse;
 import vn.edu.fpt.dto.response.plan.PlanResponse;
 import vn.edu.fpt.dto.response.planSeat.PlanSeatResponse;
 import vn.edu.fpt.dto.response.planStation.PlanStationResponse;
@@ -29,6 +32,7 @@ public class PlanServiceImpl implements PlanService {
     private final AccountRepository accountRepository;
     private final StationRepository stationRepository;
     private final SeatRepository seatRepository;
+    private final PlanStationRepository planStationRepository;
 
     @Override
     @Transactional
@@ -40,6 +44,12 @@ public class PlanServiceImpl implements PlanService {
 
         if (request.getEndTime().isBefore(request.getStartTime())) {
             throw new AppException(PlanErrorCode.INVALID_TIME_RANGE);
+        }
+
+        String normalizedCode = request.getCode().trim();
+
+        if (planRepository.existsByCode(normalizedCode)) {
+            throw new AppException(PlanErrorCode.PLAN_CODE_ALREADY_EXISTS);
         }
 
         Car car = carRepository.findById(request.getCarId())
@@ -70,6 +80,7 @@ public class PlanServiceImpl implements PlanService {
         }
 
         Plan plan = Plan.builder()
+                .code(normalizedCode)
                 .car(car)
                 .account(driver)
                 .startTime(request.getStartTime())
@@ -134,6 +145,84 @@ public class PlanServiceImpl implements PlanService {
 
         return PlanResponse.builder()
                 .id(plan.getId())
+                .code(plan.getCode())
+                .carId(plan.getCar().getId())
+                .carLicensePlate(plan.getCar().getLicensePlate())
+                .accountId(plan.getAccount().getAccountId())
+                .driverName(plan.getAccount().getFullName())
+                .startTime(plan.getStartTime())
+                .endTime(plan.getEndTime())
+                .status(plan.getStatus())
+                .stations(stationResponses)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId) {
+
+        Specification<Plan> spec = (root, query, cb) -> {
+            query.distinct(true);
+            return cb.conjunction();
+        };
+
+        if (code != null && !code.isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("code")), "%" + code.trim().toLowerCase() + "%")
+            );
+        }
+
+        if (departureStationId != null) {
+            spec = spec.and((root, query, cb) -> {
+                var joinPlanStation = root.join("planStations");
+                return cb.and(
+                        cb.equal(joinPlanStation.get("station").get("id"), departureStationId),
+                        cb.equal(joinPlanStation.get("stationOrder"), 1)
+                );
+            });
+        }
+
+        if (destinationStationId != null) {
+            spec = spec.and((root, query, cb) -> {
+                var joinPlanStation = root.join("planStations");
+                return cb.and(
+                        cb.equal(joinPlanStation.get("station").get("id"), destinationStationId),
+                        cb.greaterThan(joinPlanStation.get("stationOrder"), 1)
+                );
+            });
+        }
+
+        List<Plan> plans = planRepository.findAll(spec);
+
+        if (plans.isEmpty()) {
+            throw new AppException(PlanErrorCode.PLAN_NOT_FOUND);
+        }
+
+        List<PlanListItemResponse> items = plans.stream()
+                .map(this::mapToPlanListItemResponse)
+                .toList();
+
+        return PlanListResponse.builder()
+                .plans(items)
+                .message("Danh sách plan")
+                .totalCount(items.size())
+                .build();
+    }
+
+    private PlanListItemResponse mapToPlanListItemResponse(Plan plan) {
+        List<PlanStation> orderedStations = planStationRepository.findByPlanIdOrderByStationOrderAsc(plan.getId());
+
+        List<PlanStationResponse> stationResponses = orderedStations.stream()
+                .map(planStation -> PlanStationResponse.builder()
+                        .stationId(planStation.getStation().getId())
+                        .stationName(planStation.getStation().getName())
+                        .stationOrder(planStation.getStationOrder())
+                        .build())
+                .toList();
+
+        return PlanListItemResponse.builder()
+                .id(plan.getId())
+                .code(plan.getCode())
                 .carId(plan.getCar().getId())
                 .carLicensePlate(plan.getCar().getLicensePlate())
                 .accountId(plan.getAccount().getAccountId())

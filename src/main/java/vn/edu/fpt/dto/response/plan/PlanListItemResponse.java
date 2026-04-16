@@ -1,6 +1,7 @@
 package vn.edu.fpt.dto.response.plan;
 
 import lombok.*;
+import vn.edu.fpt.dto.response.planStation.PlanStationResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,8 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PlanResponse {
-
+public class PlanListItemResponse {
     private Long id;
     private String code;
     private Long carId;
@@ -21,5 +21,6 @@ public class PlanResponse {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String status;
-    private List<vn.edu.fpt.dto.response.planStation.PlanStationResponse> stations;
+
+    private List<PlanStationResponse> stations;
 }

@@ -20,6 +20,8 @@ public enum PlanErrorCode implements BaseErrorCode {
     PLAN_SEAT_TEMPLATE_NOT_ENOUGH(OK, "PLAN-008", "Không đủ ghế mẫu để khởi tạo cho chuyến", new HashMap<>()),
     INVALID_TOTAL_SEAT(OK, "PLAN-009", "Số lượng ghế của xe không hợp lệ", new HashMap<>()),
     INVALID_TIME_RANGE(OK, "PLAN-010", "Thời lượng không hợp lệ", new HashMap<>()),
+    PLAN_CODE_ALREADY_EXISTS(OK, "PLAN-011", "Mã lịch trình đã tồn tại", new HashMap<>()),
+    PLAN_NOT_FOUND(OK, "PLAN-012", "lịch trình không tồn tại", new HashMap<>()),
     ;
 
     private final HttpStatusCode statusCode;
