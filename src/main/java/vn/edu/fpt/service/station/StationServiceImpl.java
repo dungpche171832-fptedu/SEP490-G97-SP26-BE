@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.dto.request.station.AddStationRequest;
+import vn.edu.fpt.dto.response.station.StationDetailResponse;
 import vn.edu.fpt.dto.response.station.StationListResponse;
 import vn.edu.fpt.dto.response.station.StationResponse;
 import vn.edu.fpt.entity.City;
@@ -155,6 +156,28 @@ public class StationServiceImpl implements StationService {
                 .latitude(station.getLatitude())
                 .longitude(station.getLongitude())
                 .address(station.getAddress())
+                .cityName(station.getCity() != null ? station.getCity().getName() : null)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public StationDetailResponse getStationDetail(Long stationId) {
+        Station station = stationRepository.findById(stationId)
+                .orElseThrow(() -> new AppException(StationErrorCode.STATION_NOT_FOUND));
+
+        return mapToStationDetailResponse(station);
+    }
+
+    private StationDetailResponse mapToStationDetailResponse(Station station) {
+        return StationDetailResponse.builder()
+                .id(station.getId())
+                .name(station.getName())
+                .code(station.getCode())
+                .latitude(station.getLatitude())
+                .longitude(station.getLongitude())
+                .address(station.getAddress())
+                .cityId(station.getCity() != null ? station.getCity().getId() : null)
                 .cityName(station.getCity() != null ? station.getCity().getName() : null)
                 .build();
     }

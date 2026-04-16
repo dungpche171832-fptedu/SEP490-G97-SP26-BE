@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.dto.request.station.AddStationRequest;
+import vn.edu.fpt.dto.response.station.StationDetailResponse;
 import vn.edu.fpt.dto.response.station.StationListResponse;
 import vn.edu.fpt.dto.response.station.StationResponse;
 import vn.edu.fpt.service.station.StationService;
@@ -31,5 +32,10 @@ public class StationController {
             @RequestParam(required = false) Long cityId
     ) {
         return ResponseEntity.ok(stationService.getStations(name, code, cityId));
+    }
+
+    @GetMapping("/{stationId}")
+    public ResponseEntity<StationDetailResponse> getStationDetail(@PathVariable Long stationId) {
+        return ResponseEntity.ok(stationService.getStationDetail(stationId));
     }
 }
