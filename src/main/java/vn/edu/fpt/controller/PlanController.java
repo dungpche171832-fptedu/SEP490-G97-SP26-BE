@@ -1,4 +1,22 @@
 package vn.edu.fpt.controller;
 
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import vn.edu.fpt.dto.request.plan.AddPlanRequest;
+import vn.edu.fpt.dto.response.plan.PlanResponse;
+import vn.edu.fpt.service.plan.PlanService;
+
+@RestController
+@RequestMapping("/api/plans")
+@RequiredArgsConstructor
 public class PlanController {
+
+    private final PlanService planService;
+
+    @PostMapping
+    public ResponseEntity<PlanResponse> addPlan(@Valid @RequestBody AddPlanRequest request) {
+        return ResponseEntity.ok(planService.addPlan(request));
+    }
 }

@@ -1,4 +1,8 @@
 package vn.edu.fpt.service.plan;
 
-public interface PlanService{
+import vn.edu.fpt.dto.request.plan.AddPlanRequest;
+import vn.edu.fpt.dto.response.plan.PlanResponse;
+
+public interface PlanService {
+    PlanResponse addPlan(AddPlanRequest request);
 }
