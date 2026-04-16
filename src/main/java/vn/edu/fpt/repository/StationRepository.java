@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface StationRepository extends JpaRepository<Station, Long>, JpaSpecificationExecutor<Station> {
     Optional<Station> findByName(String name);
     Optional<Station> findByCode(String code);
-    boolean existsByName(String name);
+    boolean existsByNameAndIdNot(String name, Long id);
 
-    boolean existsByCode(String code);
+    boolean existsByCodeAndIdNot(String code, Long id);
 }

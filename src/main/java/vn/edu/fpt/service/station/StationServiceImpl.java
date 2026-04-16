@@ -7,6 +7,7 @@ import vn.edu.fpt.dto.request.station.AddStationRequest;
 import vn.edu.fpt.dto.response.station.StationDetailResponse;
 import vn.edu.fpt.dto.response.station.StationListResponse;
 import vn.edu.fpt.dto.response.station.StationResponse;
+import vn.edu.fpt.dto.response.station.UpdateStationRequest;
 import vn.edu.fpt.entity.City;
 import vn.edu.fpt.entity.Station;
 import vn.edu.fpt.exception.AppException;
@@ -169,6 +170,41 @@ public class StationServiceImpl implements StationService {
         return mapToStationDetailResponse(station);
     }
 
+    @Override
+    @Transactional
+    public StationResponse updateStation(Long stationId, UpdateStationRequest request) {
+        validateCoordinate(request.getLatitude(), request.getLongitude());
+
+        Station station = stationRepository.findById(stationId)
+                .orElseThrow(() -> new AppException(StationErrorCode.STATION_NOT_FOUND));
+
+        String normalizedName = request.getName().trim();
+        String normalizedCode = request.getCode().trim();
+        String normalizedAddress = request.getAddress() != null ? request.getAddress().trim() : null;
+
+        if (stationRepository.existsByNameAndIdNot(normalizedName, stationId)) {
+            throw new AppException(StationErrorCode.STATION_NAME_EXISTS);
+        }
+
+        if (stationRepository.existsByCodeAndIdNot(normalizedCode, stationId)) {
+            throw new AppException(StationErrorCode.STATION_CODE_EXISTS);
+        }
+
+        City city = cityRepository.findById(request.getCityId())
+                .orElseThrow(() -> new AppException(StationErrorCode.CITY_NOT_FOUND));
+
+        station.setName(normalizedName);
+        station.setCode(normalizedCode);
+        station.setLatitude(request.getLatitude());
+        station.setLongitude(request.getLongitude());
+        station.setAddress(normalizedAddress);
+        station.setCity(city);
+
+        Station updatedStation = stationRepository.save(station);
+
+        return mapToResponse(updatedStation);
+    }
+
     private StationDetailResponse mapToStationDetailResponse(Station station) {
         return StationDetailResponse.builder()
                 .id(station.getId())
@@ -181,4 +217,6 @@ public class StationServiceImpl implements StationService {
                 .cityName(station.getCity() != null ? station.getCity().getName() : null)
                 .build();
     }
+
+
 }
