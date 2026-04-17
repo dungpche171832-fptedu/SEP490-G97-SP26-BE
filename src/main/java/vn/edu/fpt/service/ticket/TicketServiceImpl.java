@@ -1,10 +1,13 @@
 package vn.edu.fpt.service.ticket;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.dto.request.ticket.CreateTicketRequest;
+import vn.edu.fpt.dto.response.ticket.TicketAddResponse;
+import vn.edu.fpt.dto.response.ticket.TicketListResponse;
 import vn.edu.fpt.dto.response.ticket.TicketResponse;
 import vn.edu.fpt.entity.*;
 import vn.edu.fpt.exception.AppException;
@@ -28,7 +31,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     @Transactional
-    public TicketResponse createTicket(CreateTicketRequest request) {
+    public TicketAddResponse createTicket(CreateTicketRequest request) {
 
         // 1. Lấy account từ token
         String email = SecurityContextHolder.getContext()
@@ -103,8 +106,8 @@ public class TicketServiceImpl implements TicketService {
     }
 
     // ===== PRIVATE MAPPER =====
-    private TicketResponse mapToResponse(Ticket ticket) {
-        return TicketResponse.builder()
+    private TicketAddResponse mapToResponse(Ticket ticket) {
+        return TicketAddResponse.builder()
                 .id(ticket.getId())
                 .bookingCode(ticket.getBookingCode())
                 .planId(ticket.getPlan().getId())
@@ -118,4 +121,53 @@ public class TicketServiceImpl implements TicketService {
                 .status(ticket.getStatus().name())
                 .build();
     }
+
+    @Override
+    @Transactional
+    public TicketListResponse getTickets(Long planId, Long branchId, Long accountId) {
+        // Sử dụng Specification để tạo truy vấn động
+        Specification<Ticket> spec = (root, query, cb) -> cb.conjunction();
+
+        // Lọc theo planId nếu có
+        if (planId != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("plan").get("id"), planId)
+            );
+        }
+
+        // Lọc theo branchId nếu có
+        if (branchId != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("branch").get("id"), branchId)
+            );
+        }
+
+        // Lọc theo accountId nếu có
+        if (accountId != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("account").get("id"), accountId)
+            );
+        }
+
+        // Truy vấn tất cả các vé theo specification
+        List<Ticket> tickets = ticketRepository.findAll(spec);
+
+        // Nếu không tìm thấy vé nào, trả về lỗi
+        if (tickets.isEmpty()) {
+            throw new AppException(TicketErrorCode.TICKET_NOT_FOUND);
+        }
+
+        // Chuyển đổi danh sách vé thành danh sách `TicketResponse`
+        List<TicketResponse> ticketResponses = tickets.stream()
+                .map(TicketResponse::new)
+                .toList();
+
+        // Trả về TicketListResponse bao gồm danh sách vé, thông báo và tổng số vé
+        return TicketListResponse.builder()
+                .tickets(ticketResponses)
+                .message("Danh sách vé")
+                .totalCount(ticketResponses.size())
+                .build();
+    }
 }
+

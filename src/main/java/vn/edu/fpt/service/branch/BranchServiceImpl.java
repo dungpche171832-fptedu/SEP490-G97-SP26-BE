@@ -143,6 +143,7 @@ public class BranchServiceImpl implements BranchService {
                 .phone(branch.getPhone())
                 .email(branch.getEmail())
                 .isActive(branch.getIsActive())
+                .imageUrl(branch.getImageUrl())
                 .build();
     }
 
