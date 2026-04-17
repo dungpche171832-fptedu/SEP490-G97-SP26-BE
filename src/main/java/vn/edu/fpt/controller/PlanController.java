@@ -9,7 +9,10 @@ import vn.edu.fpt.dto.request.plan.UpdatePlanStatusRequest;
 import vn.edu.fpt.dto.response.plan.PlanDetailResponse;
 import vn.edu.fpt.dto.response.plan.PlanListResponse;
 import vn.edu.fpt.dto.response.plan.PlanResponse;
+import vn.edu.fpt.dto.response.station.StationResponse;
 import vn.edu.fpt.service.plan.PlanService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/plans")
@@ -44,5 +47,12 @@ public class PlanController {
             @Valid @RequestBody UpdatePlanStatusRequest request
     ) {
         return ResponseEntity.ok(planService.updatePlanStatus(planId, request));
+    }
+
+    @GetMapping("/{planId}/stations")
+    public ResponseEntity<List<StationResponse>> getStationsByPlan(
+            @PathVariable Long planId
+    ) {
+        return ResponseEntity.ok(planService.getStationsByPlan(planId));
     }
 }

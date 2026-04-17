@@ -14,6 +14,7 @@ import vn.edu.fpt.dto.response.plan.PlanListResponse;
 import vn.edu.fpt.dto.response.plan.PlanResponse;
 import vn.edu.fpt.dto.response.planSeat.PlanSeatResponse;
 import vn.edu.fpt.dto.response.planStation.PlanStationResponse;
+import vn.edu.fpt.dto.response.station.StationResponse;
 import vn.edu.fpt.entity.*;
 import vn.edu.fpt.exception.AppException;
 import vn.edu.fpt.repository.*;
@@ -21,6 +22,7 @@ import vn.edu.fpt.ultis.enums.PlanSeatStatus;
 import vn.edu.fpt.ultis.errorCode.PlanErrorCode;
 import vn.edu.fpt.ultis.errorCode.StationErrorCode;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -299,5 +301,31 @@ public class PlanServiceImpl implements PlanService {
         Plan updatedPlan = planRepository.save(plan);
 
         return mapToResponse(updatedPlan);
+    }
+
+    @Override
+    public List<StationResponse> getStationsByPlan(Long planId) {
+
+        // 1. Check plan tồn tại
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
+
+        // 2. Lấy danh sách station
+        List<PlanStation> planStations = plan.getPlanStations();
+
+        // 3. Map sang response + sort theo order
+        return planStations.stream()
+                .sorted(Comparator.comparing(PlanStation::getStationOrder))
+                .map(ps -> StationResponse.builder()
+                        .id(ps.getStation().getId())
+                        .name(ps.getStation().getName())
+                        .code(ps.getStation().getCode())
+                        .address(ps.getStation().getAddress())
+                        .latitude(ps.getStation().getLatitude())
+                        .longitude(ps.getStation().getLongitude())
+                        .cityName(ps.getStation().getCity().getName())
+                        .build()
+                )
+                .toList();
     }
 }
