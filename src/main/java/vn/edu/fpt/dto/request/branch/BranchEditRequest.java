@@ -10,4 +10,5 @@ public class BranchEditRequest {
     private String phone;  // Số điện thoại
     private String email;  // Email chi nhánh
     private Boolean isActive;  // Trạng thái hoạt động
+    private String imageUrl;
 }

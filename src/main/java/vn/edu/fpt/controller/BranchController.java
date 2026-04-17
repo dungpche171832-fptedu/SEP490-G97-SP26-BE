@@ -37,6 +37,7 @@ public class BranchController {
     public ResponseEntity<AddBranchResponse> addBranch(
             @RequestBody AddBranchRequest request
     ) {
+        // Gửi yêu cầu tới service để thêm chi nhánh
         AddBranchResponse response = branchService.addBranch(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

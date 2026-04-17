@@ -14,4 +14,5 @@ public class BranchViewResponse {
     private String phone;
     private String email;
     private Boolean isActive;
+    private String imageUrl;
 }

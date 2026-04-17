@@ -40,4 +40,8 @@ public class Branch extends BaseEntity {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;  // Trạng thái hoạt động
+
+    // Trường để lưu đường dẫn ảnh
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;  // Đường dẫn tới ảnh chi nhánh
 }

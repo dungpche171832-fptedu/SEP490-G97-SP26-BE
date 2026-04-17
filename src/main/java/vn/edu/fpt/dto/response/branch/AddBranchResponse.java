@@ -14,4 +14,5 @@ public class AddBranchResponse {
     private String email;
     private Boolean isActive;
     private Long managerAccountId;
+    private String imageUrl;
 }

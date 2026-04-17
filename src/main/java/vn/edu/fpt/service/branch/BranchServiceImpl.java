@@ -62,7 +62,7 @@ public class BranchServiceImpl implements BranchService {
     @Override
     @Transactional
     public AddBranchResponse addBranch(AddBranchRequest request) {
-        // 1. Kiểm tra mã chi nhánh đã tồn tại hay chưa
+        // Kiểm tra sự tồn tại của chi nhánh, email, số điện thoại
         if (branchRepository.existsByCode(request.getCode())) {
             throw new AppException(BranchErrorCode.BRANCH_CODE_ALREADY_EXISTS);
         }
@@ -75,29 +75,26 @@ public class BranchServiceImpl implements BranchService {
         if (accountRepository.existsByEmail(request.getManagerEmail())) {
             throw new AppException(AccountErrorCode.EMAIL_ALREADY_EXISTS);
         }
-
         if (accountRepository.existsByPhone(request.getManagerPhone())) {
             throw new AppException(AccountErrorCode.PHONE_ALREADY_EXISTS);
         }
 
-        // 3. Tạo tài khoản quản lý mới và mã hóa mật khẩu
+        // Tạo tài khoản quản lý mới và mã hóa mật khẩu
         Account manager = new Account();
         manager.setFullName(request.getManagerFullName());
         manager.setEmail(request.getManagerEmail());
         manager.setPhone(request.getManagerPhone());
 
-        // Mã hóa mật khẩu trước khi lưu
         String encodedPassword = passwordEncoder.encode(request.getManagerPassword());
         manager.setPassword(encodedPassword);
 
-        // Lấy role từ DB (có thể là Manager hoặc Admin, tùy yêu cầu)
         Role managerRole = roleRepository.findById(request.getRoleId())
                 .orElseThrow(() -> new AppException(AccountErrorCode.ROLE_NOT_FOUND));
         manager.setRole(managerRole);
 
-        Account savedManager = accountRepository.save(manager);  // Lưu tài khoản quản lý
+        Account savedManager = accountRepository.save(manager);
 
-        // 3. Tạo chi nhánh mới và gán quản lý
+        // Tạo chi nhánh mới và lưu thông tin vào cơ sở dữ liệu
         Branch branch = new Branch();
         branch.setCode(request.getCode());
         branch.setName(request.getName());
@@ -105,14 +102,15 @@ public class BranchServiceImpl implements BranchService {
         branch.setPhone(request.getPhone());
         branch.setEmail(request.getEmail());
         branch.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
+        branch.setImageUrl(request.getImageUrl());  // Lưu đường dẫn ảnh chi nhánh
 
         Branch savedBranch = branchRepository.save(branch);
 
-        // 4. Cập nhật lại branchId cho tài khoản quản lý (manager)
-        savedManager.setBranchId(savedBranch.getId());  // Gán branchId cho tài khoản quản lý
+        // Cập nhật lại branchId cho tài khoản quản lý
+        savedManager.setBranchId(savedBranch.getId());
         accountRepository.save(savedManager);
 
-        // 5. Trả về response với thông tin branch và account quản lý
+        // Trả về response với thông tin chi nhánh và tài khoản quản lý
         return AddBranchResponse.builder()
                 .id(savedBranch.getId())
                 .code(savedBranch.getCode())
@@ -122,8 +120,10 @@ public class BranchServiceImpl implements BranchService {
                 .email(savedBranch.getEmail())
                 .isActive(savedBranch.getIsActive())
                 .managerAccountId(savedManager.getAccountId())  // Id của account quản lý
+                .imageUrl(savedBranch.getImageUrl())  // Trả về đường dẫn ảnh
                 .build();
     }
+
 
     @Override
     public BranchViewResponse getBranchDetail(Long id) {
@@ -149,12 +149,11 @@ public class BranchServiceImpl implements BranchService {
     @Override
     @Transactional
     public BranchEditResponse editBranch(Long branchId, BranchEditRequest request) {
-
         // 1. Lấy chi nhánh cần sửa
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() -> new AppException(BranchErrorCode.BRANCH_NOT_FOUND));
 
-        // 2. Kiểm tra trùng mã chi nhánh
+        // 2. Kiểm tra trùng mã chi nhánh và cập nhật
         if (request.getCode() != null && !request.getCode().equals(branch.getCode())) {
             if (branchRepository.existsByCode(request.getCode())) {
                 throw new AppException(BranchErrorCode.BRANCH_CODE_ALREADY_EXISTS);
@@ -162,7 +161,7 @@ public class BranchServiceImpl implements BranchService {
             branch.setCode(request.getCode());
         }
 
-        // 3. Kiểm tra trùng email
+        // 3. Kiểm tra trùng email và cập nhật
         if (request.getEmail() != null && !request.getEmail().equals(branch.getEmail())) {
             if (branchRepository.existsByEmail(request.getEmail())) {
                 throw new AppException(BranchErrorCode.BRANCH_EMAIL_ALREADY_EXISTS);
@@ -170,7 +169,7 @@ public class BranchServiceImpl implements BranchService {
             branch.setEmail(request.getEmail());
         }
 
-        // 4. Kiểm tra trùng số điện thoại
+        // 4. Kiểm tra trùng số điện thoại và cập nhật
         if (request.getPhone() != null && !request.getPhone().equals(branch.getPhone())) {
             if (branchRepository.existsByPhone(request.getPhone())) {
                 throw new AppException(BranchErrorCode.BRANCH_PHONE_ALREADY_EXISTS);
@@ -191,6 +190,11 @@ public class BranchServiceImpl implements BranchService {
             branch.setIsActive(request.getIsActive());
         }
 
+        // 6. Kiểm tra và cập nhật ảnh chi nhánh nếu có
+        if (request.getImageUrl() != null) {
+            branch.setImageUrl(request.getImageUrl());  // Cập nhật ảnh nếu có
+        }
+
         // 7. Lưu chi nhánh sau khi cập nhật
         Branch updatedBranch = branchRepository.save(branch);
 
@@ -203,6 +207,7 @@ public class BranchServiceImpl implements BranchService {
                 .phone(updatedBranch.getPhone())
                 .email(updatedBranch.getEmail())
                 .isActive(updatedBranch.getIsActive())
+                .imageUrl(updatedBranch.getImageUrl())  // Trả về đường dẫn ảnh sau khi sửa
                 .build();
     }
 }

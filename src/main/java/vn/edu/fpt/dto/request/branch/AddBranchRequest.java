@@ -17,4 +17,5 @@ public class AddBranchRequest {
     private String managerPhone;
     private String managerPassword;
     private Long roleId;  // Role cho account quản lý
+    private String imageUrl;
 }
