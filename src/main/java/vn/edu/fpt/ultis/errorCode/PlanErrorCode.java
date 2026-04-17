@@ -22,6 +22,8 @@ public enum PlanErrorCode implements BaseErrorCode {
     INVALID_TIME_RANGE(OK, "PLAN-010", "Thời lượng không hợp lệ", new HashMap<>()),
     PLAN_CODE_ALREADY_EXISTS(OK, "PLAN-011", "Mã lịch trình đã tồn tại", new HashMap<>()),
     PLAN_NOT_FOUND(OK, "PLAN-012", "lịch trình không tồn tại", new HashMap<>()),
+    SEAT_NOT_FOUND_IN_PLAN(OK, "PLAN-013", "Lịch trình không chứa ghế này", new HashMap<>()),
+    SEAT_ALREADY_BOOKED(OK, "PLAN-014", "Ghế đã được đặt", new HashMap<>()),
     ;
 
     private final HttpStatusCode statusCode;

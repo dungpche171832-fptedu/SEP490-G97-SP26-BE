@@ -4,7 +4,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import vn.edu.fpt.entity.PlanSeat;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PlanSeatRepository extends JpaRepository<PlanSeat, Long> {
-    List<PlanSeat> findByPlanIdOrderBySeatIdAsc(Long planId);
+
+    Optional<PlanSeat> findByPlanIdAndSeatId(Long planId, Long seatId);
+
+    List<PlanSeat> findAllByPlanIdAndSeatIdIn(Long planId, List<Long> seatIds);
 }

@@ -24,9 +24,9 @@ import java.math.BigDecimal;
 public class Ticket extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Sử dụng chiến lược tự động cho kiểu Long
     @Column(name = "id", updatable = false, nullable = false)
-    private String id;
+    private Long id;
 
     @Column(name = "booking_code", nullable = false, unique = true, length = 50)
     private String bookingCode;
