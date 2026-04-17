@@ -11,5 +11,5 @@ public interface RuleService {
 
     RuleListResponse getRulesByCarType(String carType);
 
-    BigDecimal getPriceByDistanceAndCarType(String carType, BigDecimal distance);
+    BigDecimal getPriceByDistanceAndCarType(String carType, BigDecimal distance, int totalSeat);
 }

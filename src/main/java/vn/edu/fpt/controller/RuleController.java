@@ -34,14 +34,15 @@ public class RuleController {
     @GetMapping("/price")
     public ResponseEntity<PriceResponse> getPriceByDistanceAndCarType(
             @RequestParam String carType,
-            @RequestParam BigDecimal distance) {
+            @RequestParam BigDecimal distance,
+            @RequestParam int totalSeat){
 
         try {
-            BigDecimal price = ruleService.getPriceByDistanceAndCarType(carType, distance);
-            PriceResponse response = new PriceResponse(price);
+            BigDecimal price = ruleService.getPriceByDistanceAndCarType(carType, distance, totalSeat);
+            PriceResponse response = new PriceResponse(price,totalSeat);
             return ResponseEntity.ok(response);
         } catch (AppException e) {
-            return ResponseEntity.status(400).body(new PriceResponse(BigDecimal.ZERO));
+            return ResponseEntity.status(400).body(new PriceResponse(BigDecimal.ZERO, 0));
         }
     }
 }

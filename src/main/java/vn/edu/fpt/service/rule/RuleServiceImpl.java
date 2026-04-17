@@ -138,7 +138,7 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     @Transactional(readOnly = true)
-    public BigDecimal getPriceByDistanceAndCarType(String carType, BigDecimal distance) {
+    public BigDecimal getPriceByDistanceAndCarType(String carType, BigDecimal distance, int totalSeat) {
         CarType parsedCarType;
         try {
             parsedCarType = CarType.valueOf(carType.trim().toUpperCase());
@@ -146,19 +146,23 @@ public class RuleServiceImpl implements RuleService {
             throw new AppException(RuleErrorCode.RULE_NOT_FOUND);
         }
 
+        // Lấy danh sách các quy tắc (rules) theo carType
         List<Rule> rules = ruleRepository.findByCarTypeOrderByMinKmAsc(parsedCarType);
 
         if (rules.isEmpty()) {
             throw new AppException(RuleErrorCode.RULE_NOT_FOUND);
         }
 
+        // Kiểm tra khoảng cách và lấy giá
         for (Rule rule : rules) {
             if (distance.compareTo(rule.getMinKm()) >= 0 &&
                     (rule.getMaxKm() == null || distance.compareTo(rule.getMaxKm()) < 0)) {
-                return rule.getPrice();
+                // Nhân giá với số ghế (totalSeat)
+                return rule.getPrice().multiply(BigDecimal.valueOf(totalSeat));
             }
         }
 
+        // Nếu không tìm thấy quy tắc phù hợp
         throw new AppException(RuleErrorCode.RULE_NOT_FOUND);
     }
 }
