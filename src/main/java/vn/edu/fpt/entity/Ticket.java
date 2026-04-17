@@ -13,7 +13,6 @@ import java.math.BigDecimal;
                 @Index(name = "idx_ticket_booking_code", columnList = "booking_code"),
                 @Index(name = "idx_ticket_plan", columnList = "plan_id"),
                 @Index(name = "idx_ticket_account", columnList = "account_id"),
-                @Index(name = "idx_ticket_seat", columnList = "seat_id"),
                 @Index(name = "idx_ticket_status", columnList = "status")
         }
 )
@@ -45,10 +44,6 @@ public class Ticket extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "branch_id", nullable = false)
     private Branch branch;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seat_id", nullable = false)
-    private Seat seat;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)

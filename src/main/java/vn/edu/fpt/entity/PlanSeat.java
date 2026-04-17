@@ -39,4 +39,9 @@ public class PlanSeat extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private PlanSeatStatus status;
+
+    // Thêm trường ticket với khả năng nullable
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ticket_id", nullable = true)  // nullable = true để trường này có thể rỗng
+    private Ticket ticket;
 }
