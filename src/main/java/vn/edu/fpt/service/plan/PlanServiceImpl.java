@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.dto.request.plan.AddPlanRequest;
+import vn.edu.fpt.dto.request.plan.UpdatePlanStatusRequest;
 import vn.edu.fpt.dto.request.planStation.PlanStationRequest;
 import vn.edu.fpt.dto.response.plan.PlanDetailResponse;
 import vn.edu.fpt.dto.response.plan.PlanListItemResponse;
@@ -160,7 +161,7 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     @Transactional(readOnly = true)
-    public PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId) {
+    public PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status) {
 
         Specification<Plan> spec = (root, query, cb) -> {
             query.distinct(true);
@@ -191,6 +192,13 @@ public class PlanServiceImpl implements PlanService {
                         cb.greaterThan(joinPlanStation.get("stationOrder"), 1)
                 );
             });
+        }
+
+        if (status != null && !status.isBlank()) {
+            String normalizedStatus = status.trim().toUpperCase();
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(cb.upper(root.get("status")), normalizedStatus)
+            );
         }
 
         List<Plan> plans = planRepository.findAll(spec);
@@ -276,5 +284,20 @@ public class PlanServiceImpl implements PlanService {
                 .stations(stationResponses)
                 .seats(seatResponses)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public PlanResponse updatePlanStatus(Long planId, UpdatePlanStatusRequest request) {
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
+
+        String normalizedStatus = request.getStatus().trim().toUpperCase();
+
+        plan.setStatus(normalizedStatus);
+
+        Plan updatedPlan = planRepository.save(plan);
+
+        return mapToResponse(updatedPlan);
     }
 }

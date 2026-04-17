@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.dto.request.plan.AddPlanRequest;
+import vn.edu.fpt.dto.request.plan.UpdatePlanStatusRequest;
 import vn.edu.fpt.dto.response.plan.PlanDetailResponse;
 import vn.edu.fpt.dto.response.plan.PlanListResponse;
 import vn.edu.fpt.dto.response.plan.PlanResponse;
@@ -26,13 +27,22 @@ public class PlanController {
     public ResponseEntity<PlanListResponse> getPlans(
             @RequestParam(required = false) String code,
             @RequestParam(required = false) Long departureStationId,
-            @RequestParam(required = false) Long destinationStationId
+            @RequestParam(required = false) Long destinationStationId,
+            @RequestParam(required = false) String status
     ) {
-        return ResponseEntity.ok(planService.getPlans(code, departureStationId, destinationStationId));
+        return ResponseEntity.ok(planService.getPlans(code, departureStationId, destinationStationId, status));
     }
 
     @GetMapping("/{planId}")
     public ResponseEntity<PlanDetailResponse> getPlanDetail(@PathVariable Long planId) {
         return ResponseEntity.ok(planService.getPlanDetail(planId));
+    }
+
+    @PatchMapping("/{planId}/status")
+    public ResponseEntity<PlanResponse> updatePlanStatus(
+            @PathVariable Long planId,
+            @Valid @RequestBody UpdatePlanStatusRequest request
+    ) {
+        return ResponseEntity.ok(planService.updatePlanStatus(planId, request));
     }
 }
