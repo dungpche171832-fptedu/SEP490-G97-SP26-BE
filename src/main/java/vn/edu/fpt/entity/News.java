@@ -8,8 +8,7 @@ import lombok.*;
         name = "news",
         indexes = {
                 @Index(name = "idx_news_title", columnList = "title"),
-                @Index(name = "idx_news_status", columnList = "status"),
-                @Index(name = "idx_news_created_at", columnList = "create_at")
+                @Index(name = "idx_news_status", columnList = "status")
         }
 )
 @Getter
