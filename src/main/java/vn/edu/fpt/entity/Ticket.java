@@ -43,6 +43,10 @@ public class Ticket extends BaseEntity {
     private Car car;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id", nullable = false)
+    private Branch branch;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_id", nullable = false)
     private Seat seat;
 
@@ -51,8 +55,15 @@ public class Ticket extends BaseEntity {
     private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "start_station_id", nullable = false)
+    private Station startStation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "end_station_id")
     private Station endStation;
+
+    @Column(name = "distance_km", nullable = false)
+    private Double distanceKm;
 
     // ===== BUSINESS FIELDS =====
 

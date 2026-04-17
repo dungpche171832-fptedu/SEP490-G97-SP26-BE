@@ -135,4 +135,30 @@ public class RuleServiceImpl implements RuleService {
                 .price(rule.getPrice())
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BigDecimal getPriceByDistanceAndCarType(String carType, BigDecimal distance) {
+        CarType parsedCarType;
+        try {
+            parsedCarType = CarType.valueOf(carType.trim().toUpperCase());
+        } catch (Exception e) {
+            throw new AppException(RuleErrorCode.RULE_NOT_FOUND);
+        }
+
+        List<Rule> rules = ruleRepository.findByCarTypeOrderByMinKmAsc(parsedCarType);
+
+        if (rules.isEmpty()) {
+            throw new AppException(RuleErrorCode.RULE_NOT_FOUND);
+        }
+
+        for (Rule rule : rules) {
+            if (distance.compareTo(rule.getMinKm()) >= 0 &&
+                    (rule.getMaxKm() == null || distance.compareTo(rule.getMaxKm()) < 0)) {
+                return rule.getPrice();
+            }
+        }
+
+        throw new AppException(RuleErrorCode.RULE_NOT_FOUND);
+    }
 }
