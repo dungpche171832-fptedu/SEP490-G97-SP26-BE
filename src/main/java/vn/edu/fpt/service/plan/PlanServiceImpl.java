@@ -22,6 +22,7 @@ import vn.edu.fpt.ultis.enums.PlanSeatStatus;
 import vn.edu.fpt.ultis.errorCode.PlanErrorCode;
 import vn.edu.fpt.ultis.errorCode.StationErrorCode;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -161,9 +162,8 @@ public class PlanServiceImpl implements PlanService {
                 .build();
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status) {
+    public PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status, LocalDateTime startTime) {
 
         Specification<Plan> spec = (root, query, cb) -> {
             query.distinct(true);
@@ -200,6 +200,12 @@ public class PlanServiceImpl implements PlanService {
             String normalizedStatus = status.trim().toUpperCase();
             spec = spec.and((root, query, cb) ->
                     cb.equal(cb.upper(root.get("status")), normalizedStatus)
+            );
+        }
+
+        if (startTime != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.greaterThanOrEqualTo(root.get("startTime"), startTime)
             );
         }
 

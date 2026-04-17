@@ -7,12 +7,13 @@ import vn.edu.fpt.dto.response.plan.PlanListResponse;
 import vn.edu.fpt.dto.response.plan.PlanResponse;
 import vn.edu.fpt.dto.response.station.StationResponse;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PlanService {
     PlanResponse addPlan(AddPlanRequest request);
 
-    PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status);
+    PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status, LocalDateTime startTime);
 
     PlanDetailResponse getPlanDetail(Long planId);
 

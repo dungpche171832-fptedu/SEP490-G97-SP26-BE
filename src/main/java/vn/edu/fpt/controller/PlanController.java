@@ -2,6 +2,7 @@ package vn.edu.fpt.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.dto.request.plan.AddPlanRequest;
@@ -12,6 +13,7 @@ import vn.edu.fpt.dto.response.plan.PlanResponse;
 import vn.edu.fpt.dto.response.station.StationResponse;
 import vn.edu.fpt.service.plan.PlanService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -31,9 +33,11 @@ public class PlanController {
             @RequestParam(required = false) String code,
             @RequestParam(required = false) Long departureStationId,
             @RequestParam(required = false) Long destinationStationId,
-            @RequestParam(required = false) String status
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime
+
     ) {
-        return ResponseEntity.ok(planService.getPlans(code, departureStationId, destinationStationId, status));
+        return ResponseEntity.ok(planService.getPlans(code, departureStationId, destinationStationId, status, startTime));
     }
 
     @GetMapping("/{planId}")
