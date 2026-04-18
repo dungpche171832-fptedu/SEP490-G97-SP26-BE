@@ -27,6 +27,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .subject(account.getEmail())
                 .subject(String.valueOf(account.getBranchId()))
+                .claim("branchId", account.getBranchId())
                 .claim("accountId", account.getAccountId())
                 .claim("role", account.getRole().getName())
                 .issuedAt(new Date())
