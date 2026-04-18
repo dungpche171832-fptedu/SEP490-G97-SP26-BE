@@ -24,10 +24,11 @@ public class JwtUtil {
     }
 
     public String generateAccessToken(Account account) {
+        System.out.println("branchId: " + account.getBranchId());
+
         return Jwts.builder()
                 .subject(account.getEmail())
-                .subject(String.valueOf(account.getBranchId()))
-                .claim("branchId", account.getBranchId())
+                .claim("branchId", account.getBranchId() == null ? "null" : account.getBranchId())
                 .claim("accountId", account.getAccountId())
                 .claim("role", account.getRole().getName())
                 .issuedAt(new Date())
