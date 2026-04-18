@@ -35,10 +35,10 @@ public class PlanController {
             @RequestParam(required = false) Long departureStationId,
             @RequestParam(required = false) Long destinationStationId,
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startTime
-
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startTime,
+            @RequestParam(required = false) Long accountId
     ) {
-        return ResponseEntity.ok(planService.getPlans(code, departureStationId, destinationStationId, status, startTime));
+        return ResponseEntity.ok(planService.getPlans(code, departureStationId, destinationStationId, status, startTime, accountId ));
     }
 
     @GetMapping("/{planId}")

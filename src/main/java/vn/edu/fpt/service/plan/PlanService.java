@@ -13,7 +13,7 @@ import java.util.List;
 public interface PlanService {
     PlanResponse addPlan(AddPlanRequest request);
 
-    PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status, Date startTime);
+    PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status, Date startTime, Long accountId);
 
     PlanDetailResponse getPlanDetail(Long planId);
 

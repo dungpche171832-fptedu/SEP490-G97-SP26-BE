@@ -23,6 +23,8 @@ import vn.edu.fpt.ultis.errorCode.PlanErrorCode;
 import vn.edu.fpt.ultis.errorCode.StationErrorCode;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -160,7 +162,7 @@ public class PlanServiceImpl implements PlanService {
     }
 
     @Transactional(readOnly = true)
-    public PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status, Date startTime) {
+    public PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status, Date startTime, Long accountId) {
 
         Specification<Plan> spec = (root, query, cb) -> {
             query.distinct(true);
@@ -201,8 +203,31 @@ public class PlanServiceImpl implements PlanService {
         }
 
         if (startTime != null) {
+            // Chuyển đổi startTime thành LocalDateTime
+            LocalDateTime startOfDay = startTime.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                    .atStartOfDay(); // 00:00:00 của ngày truyền vào
+
+            // Kết thúc ngày (23:59:59)
+            LocalDateTime endOfDay = startTime.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                    .atTime(LocalTime.MAX); // 23:59:59
+
+            // So sánh startTime nằm trong khoảng từ 00:00:00 đến 23:59:59
             spec = spec.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(root.get("startTime"), startTime)
+                    cb.and(
+                            cb.greaterThanOrEqualTo(root.get("startTime"), startOfDay), // Bắt đầu ngày
+                            cb.lessThanOrEqualTo(root.get("startTime"), endOfDay)     // Kết thúc ngày
+                    )
+            );
+        }
+
+        if (accountId != null) {
+            // Thêm điều kiện lọc theo accountId
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("account").get("id"), accountId) // Lọc theo accountId
             );
         }
 
