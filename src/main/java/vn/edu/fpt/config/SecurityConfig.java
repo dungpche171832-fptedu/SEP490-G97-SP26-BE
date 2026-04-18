@@ -54,7 +54,8 @@ public class SecurityConfig {
                         // ===== PUBLIC =====
                         .requestMatchers(
                                 "/",
-                                "/api/auth/**"
+                                "/api/auth/**",
+                                "/api/plans/**"
                         ).permitAll()
 
                         .requestMatchers(

@@ -14,6 +14,7 @@ import vn.edu.fpt.dto.response.station.StationResponse;
 import vn.edu.fpt.service.plan.PlanService;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -34,7 +35,7 @@ public class PlanController {
             @RequestParam(required = false) Long departureStationId,
             @RequestParam(required = false) Long destinationStationId,
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startTime
 
     ) {
         return ResponseEntity.ok(planService.getPlans(code, departureStationId, destinationStationId, status, startTime));

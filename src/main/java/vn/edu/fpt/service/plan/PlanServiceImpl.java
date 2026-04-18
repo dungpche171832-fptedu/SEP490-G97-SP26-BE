@@ -23,10 +23,7 @@ import vn.edu.fpt.ultis.errorCode.PlanErrorCode;
 import vn.edu.fpt.ultis.errorCode.StationErrorCode;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -163,7 +160,7 @@ public class PlanServiceImpl implements PlanService {
     }
 
     @Transactional(readOnly = true)
-    public PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status, LocalDateTime startTime) {
+    public PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status, Date startTime) {
 
         Specification<Plan> spec = (root, query, cb) -> {
             query.distinct(true);
