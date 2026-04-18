@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.dto.request.ticket.CreateTicketRequest;
 import vn.edu.fpt.dto.response.ticket.TicketAddResponse;
 import vn.edu.fpt.dto.response.ticket.TicketListResponse;
+import vn.edu.fpt.dto.response.ticket.TicketResponse;
 import vn.edu.fpt.service.ticket.TicketService;
 
 @RestController
@@ -33,5 +34,18 @@ public class TicketController {
         TicketListResponse response = ticketService.getTickets(planId, branchId, accountId);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{ticketId}")
+    public ResponseEntity<TicketResponse> getTicketDetail(@PathVariable Long ticketId) {
+        // Gọi service để lấy thông tin chi tiết vé
+        TicketResponse ticketResponse = ticketService.getTicketDetail(ticketId);
+        return ResponseEntity.ok(ticketResponse);
+    }
+
+    @PutMapping("/{ticketId}/status")
+    public ResponseEntity<TicketResponse> updateTicketStatus(@PathVariable Long ticketId, @RequestBody String newStatus) {
+        TicketResponse updatedTicket = ticketService.updateTicketStatus(ticketId, newStatus);
+        return ResponseEntity.ok(updatedTicket);
     }
 }

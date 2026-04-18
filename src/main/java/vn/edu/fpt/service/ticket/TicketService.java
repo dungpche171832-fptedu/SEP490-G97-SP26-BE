@@ -11,4 +11,8 @@ public interface TicketService {
     TicketAddResponse createTicket(CreateTicketRequest request);
 
     TicketListResponse getTickets(Long planId, Long branchId, Long accountId);
+
+    TicketResponse getTicketDetail(Long ticketId);
+
+    TicketResponse updateTicketStatus(Long ticketId, String newStatus);
 }

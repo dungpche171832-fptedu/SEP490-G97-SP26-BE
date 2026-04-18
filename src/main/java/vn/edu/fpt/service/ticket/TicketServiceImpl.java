@@ -17,6 +17,7 @@ import vn.edu.fpt.ultis.enums.TicketStatus;
 import vn.edu.fpt.ultis.errorCode.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -168,6 +169,45 @@ public class TicketServiceImpl implements TicketService {
                 .message("Danh sách vé")
                 .totalCount(ticketResponses.size())
                 .build();
+    }
+
+    @Override
+    public TicketResponse getTicketDetail(Long ticketId) {
+        // Lấy thông tin Ticket từ cơ sở dữ liệu bằng ID
+        Optional<Ticket> ticketOptional = ticketRepository.findById(ticketId);
+
+        // Kiểm tra nếu vé không tồn tại, ném AppException
+        if (ticketOptional.isEmpty()) {
+            throw new AppException(TicketErrorCode.TICKET_NOT_FOUND);
+        }
+
+        // Nếu vé tồn tại, chuyển đối tượng Ticket thành TicketResponse
+        Ticket ticket = ticketOptional.get();
+        return new TicketResponse(ticket);  // Chuyển đổi Ticket thành TicketResponse
+    }
+
+    @Override
+    public TicketResponse updateTicketStatus(Long ticketId, String newStatus) {
+        Optional<Ticket> ticketOptional = ticketRepository.findById(ticketId);
+
+        if (ticketOptional.isEmpty()) {
+            throw new AppException(TicketErrorCode.TICKET_NOT_FOUND);
+        }
+
+        Ticket ticket = ticketOptional.get();
+
+        // Chuyển String thành TicketStatus enum, đảm bảo luôn chuyển thành chữ hoa
+        try {
+            ticket.setStatus(TicketStatus.valueOf(newStatus.toUpperCase()));  // Chuyển String thành TicketStatus enum
+        } catch (IllegalArgumentException e) {
+            throw new AppException(TicketErrorCode.TICKET_STATUS_NOT_FOUND);
+        }
+
+        // Lưu lại vé với status đã thay đổi
+        Ticket updatedTicket = ticketRepository.save(ticket);
+
+        // Trả về TicketResponse đã được cập nhật
+        return new TicketResponse(updatedTicket);
     }
 }
 
