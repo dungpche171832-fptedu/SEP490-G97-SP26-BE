@@ -7,12 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.dto.request.plan.AddPlanRequest;
 import vn.edu.fpt.dto.request.plan.UpdatePlanStatusRequest;
-import vn.edu.fpt.dto.request.planStation.PlanStationRequest;
 import vn.edu.fpt.dto.response.plan.*;
 import vn.edu.fpt.dto.response.planSeat.PlanSeatResponse;
-import vn.edu.fpt.dto.response.planStation.PlanStationResponse;
 import vn.edu.fpt.dto.response.routeStation.RouteStationResponse;
-import vn.edu.fpt.dto.response.station.StationResponse;
 import vn.edu.fpt.entity.*;
 import vn.edu.fpt.exception.AppException;
 import vn.edu.fpt.repository.*;
@@ -20,7 +17,7 @@ import vn.edu.fpt.ultis.enums.PlanSeatStatus;
 import vn.edu.fpt.ultis.errorCode.BranchErrorCode;
 import vn.edu.fpt.ultis.errorCode.PlanErrorCode;
 import vn.edu.fpt.ultis.errorCode.RouteErrorCode;
-import vn.edu.fpt.ultis.errorCode.StationErrorCode;
+
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -154,6 +151,7 @@ public class PlanServiceImpl implements PlanService {
 
                 .accountId(plan.getAccount().getAccountId())
                 .driverName(plan.getAccount().getFullName())
+                .driverPhone(plan.getAccount().getPhone())
 
                 .branchId(plan.getBranch().getId())
                 .branchName(plan.getBranch().getName())
@@ -168,117 +166,169 @@ public class PlanServiceImpl implements PlanService {
                 .build();
     }
 
-//    @Transactional(readOnly = true)
-//    public PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status, Date startTime, Long accountId) {
-//
-//        Specification<Plan> spec = (root, query, cb) -> {
-//            query.distinct(true);
-//            return cb.conjunction();
-//        };
-//
-//        if (code != null && !code.isBlank()) {
-//            spec = spec.and((root, query, cb) ->
-//                    cb.like(cb.lower(root.get("code")), "%" + code.trim().toLowerCase() + "%")
-//            );
-//        }
-//
-//        if (departureStationId != null) {
-//            spec = spec.and((root, query, cb) -> {
-//                var joinPlanStation = root.join("planStations");
-//                return cb.and(
-//                        cb.equal(joinPlanStation.get("station").get("id"), departureStationId),
-//                        cb.equal(joinPlanStation.get("stationOrder"), 1)
-//                );
-//            });
-//        }
-//
-//        if (destinationStationId != null) {
-//            spec = spec.and((root, query, cb) -> {
-//                var joinPlanStation = root.join("planStations");
-//                return cb.and(
-//                        cb.equal(joinPlanStation.get("station").get("id"), destinationStationId),
-//                        cb.greaterThan(joinPlanStation.get("stationOrder"), 1)
-//                );
-//            });
-//        }
-//
-//        if (status != null && !status.isBlank()) {
-//            String normalizedStatus = status.trim().toUpperCase();
-//            spec = spec.and((root, query, cb) ->
-//                    cb.equal(cb.upper(root.get("status")), normalizedStatus)
-//            );
-//        }
-//
-//        if (startTime != null) {
-//            // Chuyển đổi startTime thành LocalDateTime
-//            LocalDateTime startOfDay = startTime.toInstant()
-//                    .atZone(ZoneId.systemDefault())
-//                    .toLocalDate()
-//                    .atStartOfDay(); // 00:00:00 của ngày truyền vào
-//
-//            // Kết thúc ngày (23:59:59)
-//            LocalDateTime endOfDay = startTime.toInstant()
-//                    .atZone(ZoneId.systemDefault())
-//                    .toLocalDate()
-//                    .atTime(LocalTime.MAX); // 23:59:59
-//
-//            // So sánh startTime nằm trong khoảng từ 00:00:00 đến 23:59:59
-//            spec = spec.and((root, query, cb) ->
-//                    cb.and(
-//                            cb.greaterThanOrEqualTo(root.get("startTime"), startOfDay), // Bắt đầu ngày
-//                            cb.lessThanOrEqualTo(root.get("startTime"), endOfDay)     // Kết thúc ngày
-//                    )
-//            );
-//        }
-//
-//        if (accountId != null) {
-//            // Thêm điều kiện lọc theo accountId
-//            spec = spec.and((root, query, cb) ->
-//                    cb.equal(root.get("account").get("id"), accountId) // Lọc theo accountId
-//            );
-//        }
-//
-//        List<Plan> plans = planRepository.findAll(spec);
-//
-//        if (plans.isEmpty()) {
-//            throw new AppException(PlanErrorCode.PLAN_NOT_FOUND);
-//        }
-//
-//        List<PlanListItemResponse> items = plans.stream()
-//                .map(this::mapToPlanListItemResponse)
-//                .toList();
-//
-//        return PlanListResponse.builder()
-//                .plans(items)
-//                .message("Danh sách plan")
-//                .totalCount(items.size())
-//                .build();
-//    }
-//
-//    private PlanListItemResponse mapToPlanListItemResponse(Plan plan) {
-//        List<PlanStation> orderedStations = planStationRepository.findByPlanIdOrderByStationOrderAsc(plan.getId());
-//
-//        List<PlanStationResponse> stationResponses = orderedStations.stream()
-//                .map(planStation -> PlanStationResponse.builder()
-//                        .stationId(planStation.getStation().getId())
-//                        .stationName(planStation.getStation().getName())
-//                        .stationOrder(planStation.getStationOrder())
-//                        .build())
-//                .toList();
-//
-//        return PlanListItemResponse.builder()
-//                .id(plan.getId())
-//                .code(plan.getCode())
-//                .carId(plan.getCar().getId())
-//                .carLicensePlate(plan.getCar().getLicensePlate())
-//                .accountId(plan.getAccount().getAccountId())
-//                .driverName(plan.getAccount().getFullName())
-//                .startTime(plan.getStartTime())
-//                .endTime(plan.getEndTime())
-//                .status(plan.getStatus())
-//                .stations(stationResponses)
-//                .build();
-//    }
+    @Override
+    @Transactional(readOnly = true)
+    public PlanListResponse getPlans(
+            String code,
+            Long departureStationId,
+            Long destinationStationId,
+            String status,
+            Date startTime,
+            Long accountId,
+            Long branchId
+    ) {
+
+        Specification<Plan> spec = (root, query, cb) -> {
+            query.distinct(true);
+            return cb.conjunction();
+        };
+
+        // ===== FILTER CODE =====
+        if (code != null && !code.isBlank()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("code")), "%" + code.trim().toLowerCase() + "%")
+            );
+        }
+
+        // ===== FILTER DEPARTURE + DESTINATION =====
+        if (departureStationId != null && destinationStationId != null) {
+            spec = spec.and((root, query, cb) -> {
+
+                var route = root.join("route");
+
+                var rsDeparture = route.join("routeStations");
+                var rsDestination = route.join("routeStations");
+
+                return cb.and(
+                        // A là điểm đầu
+                        cb.equal(rsDeparture.get("station").get("id"), departureStationId),
+                        cb.equal(rsDeparture.get("stationOrder"), 1),
+
+                        // B là điểm phía sau
+                        cb.equal(rsDestination.get("station").get("id"), destinationStationId),
+                        cb.greaterThan(rsDestination.get("stationOrder"), 1)
+                );
+            });
+        }
+
+        // ===== CHỈ DEPARTURE =====
+        if (departureStationId != null && destinationStationId == null) {
+            spec = spec.and((root, query, cb) -> {
+                var route = root.join("route");
+                var rs = route.join("routeStations");
+
+                return cb.and(
+                        cb.equal(rs.get("station").get("id"), departureStationId),
+                        cb.equal(rs.get("stationOrder"), 1)
+                );
+            });
+        }
+
+        // ===== CHỈ DESTINATION =====
+        if (destinationStationId != null && departureStationId == null) {
+            spec = spec.and((root, query, cb) -> {
+                var route = root.join("route");
+                var rs = route.join("routeStations");
+
+                return cb.and(
+                        cb.equal(rs.get("station").get("id"), destinationStationId),
+                        cb.greaterThan(rs.get("stationOrder"), 1)
+                );
+            });
+        }
+
+        // ===== FILTER STATUS =====
+        if (status != null && !status.isBlank()) {
+            String normalizedStatus = status.trim().toUpperCase();
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(cb.upper(root.get("status")), normalizedStatus)
+            );
+        }
+
+        // ===== FILTER DATE =====
+        if (startTime != null) {
+            LocalDateTime startOfDay = startTime.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                    .atStartOfDay();
+
+            LocalDateTime endOfDay = startTime.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                    .atTime(LocalTime.MAX);
+
+            spec = spec.and((root, query, cb) ->
+                    cb.between(root.get("startTime"), startOfDay, endOfDay)
+            );
+        }
+
+        // ===== FILTER ACCOUNT =====
+        if (accountId != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("account").get("accountId"), accountId)
+            );
+        }
+
+        // ===== FILTER BRANCH =====
+        if (branchId != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("branch").get("id"), branchId)
+            );
+        }
+
+        List<Plan> plans = planRepository.findAll(spec);
+
+        if (plans.isEmpty()) {
+            throw new AppException(PlanErrorCode.PLAN_NOT_FOUND);
+        }
+
+        List<PlanListItemResponse> items = plans.stream()
+                .map(this::mapToPlanListItemResponse)
+                .toList();
+
+        return PlanListResponse.builder()
+                .plans(items)
+                .totalCount(items.size())
+                .message("Danh sách plan")
+                .build();
+    }
+
+    // ================= MAP RESPONSE =================
+    private PlanListItemResponse mapToPlanListItemResponse(Plan plan) {
+
+        List<RouteStationResponse> stations = plan.getRoute().getRouteStations().stream()
+                .sorted(Comparator.comparing(RouteStation::getStationOrder))
+                .map(rs -> RouteStationResponse.builder()
+                        .stationId(rs.getStation().getId())
+                        .stationName(rs.getStation().getName())
+                        .order(rs.getStationOrder())
+                        .build())
+                .toList();
+
+        return PlanListItemResponse.builder()
+                .id(plan.getId())
+                .code(plan.getCode())
+
+                .carId(plan.getCar().getId())
+                .carLicensePlate(plan.getCar().getLicensePlate())
+
+                .accountId(plan.getAccount().getAccountId())
+                .driverName(plan.getAccount().getFullName())
+                .driverPhone(plan.getAccount().getPhone())
+
+                .branchId(plan.getBranch().getId())
+                .branchName(plan.getBranch().getName())
+
+                .routeId(plan.getRoute().getId())
+                .routeName(plan.getRoute().getName())
+
+                .startTime(plan.getStartTime())
+                .status(plan.getStatus())
+
+                .stations(stations)
+                .build();
+    }
+
 //
 //    @Override
 //    @Transactional(readOnly = true)

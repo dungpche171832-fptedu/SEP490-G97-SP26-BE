@@ -30,17 +30,20 @@ public class PlanController {
         return ResponseEntity.ok(planService.addPlan(request));
     }
 
-//    @GetMapping
-//    public ResponseEntity<PlanListResponse> getPlans(
-//            @RequestParam(required = false) String code,
-//            @RequestParam(required = false) Long departureStationId,
-//            @RequestParam(required = false) Long destinationStationId,
-//            @RequestParam(required = false) String status,
-//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startTime,
-//            @RequestParam(required = false) Long accountId
-//    ) {
-//        return ResponseEntity.ok(planService.getPlans(code, departureStationId, destinationStationId, status, startTime, accountId ));
-//    }
+    @GetMapping
+    public ResponseEntity<PlanListResponse> getPlans(
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) Long departureStationId,
+            @RequestParam(required = false) Long destinationStationId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startTime,
+            @RequestParam(required = false) Long accountId,
+            @RequestParam(required = false) Long branchId
+    ) {
+        return ResponseEntity.ok(
+                planService.getPlans(code, departureStationId, destinationStationId, status, startTime, accountId, branchId)
+        );
+    }
 //
 //    @GetMapping("/{planId}")
 //    public ResponseEntity<PlanDetailResponse> getPlanDetail(@PathVariable Long planId) {

@@ -14,7 +14,15 @@ import java.util.List;
 public interface PlanService {
     PlanPairResponse addPlan(AddPlanRequest request);
 
-//    PlanListResponse getPlans(String code, Long departureStationId, Long destinationStationId, String status, Date startTime, Long accountId);
+    PlanListResponse getPlans(
+            String code,
+            Long departureStationId,
+            Long destinationStationId,
+            String status,
+            Date startTime,
+            Long accountId,
+            Long branchId
+    );
 //
 //    PlanDetailResponse getPlanDetail(Long planId);
 //

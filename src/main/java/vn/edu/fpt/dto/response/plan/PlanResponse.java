@@ -19,6 +19,7 @@ public class PlanResponse {
 
     private Long accountId;
     private String driverName;
+    private String driverPhone;
 
     private Long branchId;
     private String branchName;
@@ -27,7 +28,6 @@ public class PlanResponse {
     private String routeName;
 
     private LocalDateTime startTime;
-    private LocalDateTime endTime;
 
     private String status;
 

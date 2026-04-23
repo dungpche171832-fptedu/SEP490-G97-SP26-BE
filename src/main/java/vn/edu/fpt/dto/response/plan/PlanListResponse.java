@@ -7,7 +7,7 @@ import java.util.List;
 @Data
 @Builder
 public class PlanListResponse {
-    private List<PlanResponse> plans;
+    private List<PlanListItemResponse> plans;
     private int totalCount;
     private String message;
 }
