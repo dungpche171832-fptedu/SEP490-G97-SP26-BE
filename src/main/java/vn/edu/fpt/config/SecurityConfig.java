@@ -56,7 +56,8 @@ public class SecurityConfig {
                                 "/",
                                 "/api/auth/**",
                                 "/api/plans/**",
-                                "/api/cities"
+                                "/api/cities",
+                                "/api/rules/price"
                         ).permitAll()
 
                         .requestMatchers(

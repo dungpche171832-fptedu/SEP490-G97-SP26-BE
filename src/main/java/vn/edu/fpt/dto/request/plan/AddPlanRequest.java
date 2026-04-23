@@ -1,36 +1,15 @@
 package vn.edu.fpt.dto.request.plan;
 
-import jakarta.validation.constraints.*;
-import lombok.*;
-
+import lombok.Data;
 import java.time.LocalDateTime;
-import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data
 public class AddPlanRequest {
-
-    @NotBlank
     private String code;
-
-    @NotNull
+    private Long routeId;
     private Long carId;
-
-    @NotNull
-    private Long accountId; // driver
-
-    @NotNull
+    private Long accountId;
+    private Long branchId;
     private LocalDateTime startTime;
-
-    @NotNull
-    private LocalDateTime endTime;
-
-    @NotBlank
     private String status;
-
-    @NotEmpty
-    private List<vn.edu.fpt.dto.request.planStation.PlanStationRequest> stations;
 }

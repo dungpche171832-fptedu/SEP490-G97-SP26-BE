@@ -48,5 +48,5 @@ public class Station extends BaseEntity {
 
     @OneToMany(mappedBy = "station")
     @Builder.Default
-    private List<PlanStation> planStations = new ArrayList<>();
+    private List<RouteStation> routeStations = new ArrayList<>();
 }

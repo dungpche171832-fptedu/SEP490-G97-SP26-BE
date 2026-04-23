@@ -1,15 +1,8 @@
 package vn.edu.fpt.dto.request.plan;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data
 public class UpdatePlanStatusRequest {
-
-    @NotBlank
     private String status;
 }

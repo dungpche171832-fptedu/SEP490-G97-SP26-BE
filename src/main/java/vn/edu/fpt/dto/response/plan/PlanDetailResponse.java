@@ -3,6 +3,7 @@ package vn.edu.fpt.dto.response.plan;
 import lombok.*;
 import vn.edu.fpt.dto.response.planSeat.PlanSeatResponse;
 import vn.edu.fpt.dto.response.planStation.PlanStationResponse;
+import vn.edu.fpt.dto.response.routeStation.RouteStationResponse;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +23,6 @@ public class PlanDetailResponse {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String status;
-    private List<PlanStationResponse> stations;
+    private List<RouteStationResponse> stations;
     private List<PlanSeatResponse> seats;
 }

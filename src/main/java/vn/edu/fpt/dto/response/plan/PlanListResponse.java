@@ -1,17 +1,13 @@
 package vn.edu.fpt.dto.response.plan;
 
-import lombok.*;
-
-import java.time.LocalDateTime;
+import lombok.Builder;
+import lombok.Data;
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 @Builder
 public class PlanListResponse {
-    private List<PlanListItemResponse> plans;
-    private String message;
+    private List<PlanResponse> plans;
     private int totalCount;
+    private String message;
 }

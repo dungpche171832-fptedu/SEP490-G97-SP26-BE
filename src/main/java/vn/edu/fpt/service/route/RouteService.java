@@ -1,4 +1,8 @@
 package vn.edu.fpt.service.route;
 
-public interface RouteService{
+import vn.edu.fpt.dto.request.route.CreateRouteRequest;
+import vn.edu.fpt.dto.response.RouteResponse;
+
+public interface RouteService {
+    RouteResponse createRoute(CreateRouteRequest request);
 }
