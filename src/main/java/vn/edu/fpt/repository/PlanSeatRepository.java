@@ -11,4 +11,6 @@ public interface PlanSeatRepository extends JpaRepository<PlanSeat, Long> {
     Optional<PlanSeat> findByPlanIdAndSeatId(Long planId, Long seatId);
 
     List<PlanSeat> findAllByPlanIdAndSeatIdIn(Long planId, List<Long> seatIds);
+
+    List<PlanSeat> findByTicketId(Long ticketId);
 }

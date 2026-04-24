@@ -16,6 +16,7 @@ public enum CarErrorCode implements BaseErrorCode {
     INVALID_TOTAL_SEAT(OK, "CAR-004", "Số ghế không hợp lệ", new HashMap<>()),
     INVALID_MANUFACTURE_YEAR(OK, "CAR-005", "Năm sản xuất không hợp lệ", new HashMap<>()),
     CAR_NOT_ACTIVE(OK, "CAR-006", "Xe không hoạt động", new HashMap<>()),
+    CAR_TYPE_NOT_MATCH(OK, "CAR-007", "Loại xe không phù hợp", new HashMap<>()),
     ;
 
     private final HttpStatusCode statusCode;

@@ -15,12 +15,9 @@ import vn.edu.fpt.entity.*;
 import vn.edu.fpt.exception.AppException;
 import vn.edu.fpt.repository.*;
 import vn.edu.fpt.service.email.EmailService;
-import vn.edu.fpt.service.email.MailChangeDriverSender;
+import vn.edu.fpt.service.email.MailChangeSender;
 import vn.edu.fpt.ultis.enums.PlanSeatStatus;
-import vn.edu.fpt.ultis.errorCode.AccountErrorCode;
-import vn.edu.fpt.ultis.errorCode.BranchErrorCode;
-import vn.edu.fpt.ultis.errorCode.PlanErrorCode;
-import vn.edu.fpt.ultis.errorCode.RouteErrorCode;
+import vn.edu.fpt.ultis.errorCode.*;
 
 
 import java.time.LocalDateTime;
@@ -42,6 +39,8 @@ public class PlanServiceImpl implements PlanService {
     private final RouteStationRepository routeStationRepository;
     private final PlanDriverHistoryRepository planDriverHistoryRepository;
     private final EmailService emailService;
+    private final TicketRepository ticketRepository;
+    private final PlanSeatRepository planSeatRepository;
 
 
     @Override
@@ -480,5 +479,60 @@ public class PlanServiceImpl implements PlanService {
 
         // 10. Gửi mail (async)
         emailService.sendChangeDriverEmail(oldDriver, newDriver, plan);
+    }
+
+    @Override
+    @Transactional
+    public void changeCar(Long planId, Long newCarId) {
+
+        // 1. Lấy plan
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
+
+        Car oldCar = plan.getCar();
+
+        // 2. Lấy xe mới
+        Car newCar = carRepository.findById(newCarId)
+                .orElseThrow(() -> new AppException(CarErrorCode.CAR_NOT_FOUND));
+
+        // 3. Validate cùng car type
+        if (!oldCar.getCarType().equals(newCar.getCarType())) {
+            throw new AppException(CarErrorCode.CAR_TYPE_NOT_MATCH);
+        }
+
+        // 4. Update plan
+        plan.setCar(newCar);
+        planRepository.save(plan);
+
+        // 5. Lấy ticket
+        List<Ticket> tickets = ticketRepository.findByPlanId(planId);
+
+        // 6. Update car trong ticket
+        tickets.forEach(t -> t.setCar(newCar));
+        ticketRepository.saveAll(tickets);
+
+        // 7. Gửi mail driver
+        emailService.sendChangeCarDriver(
+                plan.getAccount(),
+                plan,
+                oldCar,
+                newCar
+        );
+
+        // 8. Gửi mail passenger
+        for (Ticket ticket : tickets) {
+
+            List<PlanSeat> seats =
+                    planSeatRepository.findByTicketId(ticket.getId());
+
+            emailService.sendChangeCarPassenger(
+                    ticket.getAccount(),
+                    plan,
+                    oldCar,
+                    newCar,
+                    ticket,
+                    seats
+            );
+        }
     }
 }

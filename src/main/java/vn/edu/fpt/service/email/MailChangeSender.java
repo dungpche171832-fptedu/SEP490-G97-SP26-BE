@@ -6,11 +6,11 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MailChangeDriverSender {
+public class MailChangeSender {
 
     private final JavaMailSender mailSender;
 
-    public MailChangeDriverSender(JavaMailSender mailSender) {
+    public MailChangeSender(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 

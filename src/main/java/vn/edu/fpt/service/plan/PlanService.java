@@ -31,4 +31,6 @@ public interface PlanService {
     List<StationResponse> getStationsByPlan(Long planId);
 
     void changeDriver(Long planId, Long newDriverId);
+
+    void changeCar(Long planId, Long newCarId);
 }
