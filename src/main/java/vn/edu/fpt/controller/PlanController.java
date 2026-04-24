@@ -44,24 +44,23 @@ public class PlanController {
                 planService.getPlans(code, departureStationId, destinationStationId, status, startTime, accountId, branchId)
         );
     }
-//
-//    @GetMapping("/{planId}")
-//    public ResponseEntity<PlanDetailResponse> getPlanDetail(@PathVariable Long planId) {
-//        return ResponseEntity.ok(planService.getPlanDetail(planId));
-//    }
-//
-//    @PatchMapping("/{planId}/status")
-//    public ResponseEntity<PlanResponse> updatePlanStatus(
-//            @PathVariable Long planId,
-//            @Valid @RequestBody UpdatePlanStatusRequest request
-//    ) {
-//        return ResponseEntity.ok(planService.updatePlanStatus(planId, request));
-//    }
-//
-//    @GetMapping("/{planId}/stations")
-//    public ResponseEntity<List<StationResponse>> getStationsByPlan(
-//            @PathVariable Long planId
-//    ) {
-//        return ResponseEntity.ok(planService.getStationsByPlan(planId));
-//    }
+    @GetMapping("/{planId}")
+    public ResponseEntity<PlanResponse> getPlanDetail(@PathVariable Long planId) {
+        return ResponseEntity.ok(planService.getPlanDetail(planId));
+    }
+
+    @PatchMapping("/{planId}/status")
+    public ResponseEntity<PlanResponse> updatePlanStatus(
+            @PathVariable Long planId,
+            @Valid @RequestBody UpdatePlanStatusRequest request
+    ) {
+        return ResponseEntity.ok(planService.updatePlanStatus(planId, request));
+    }
+
+    @GetMapping("/{planId}/stations")
+    public ResponseEntity<List<StationResponse>> getStationsByPlan(
+            @PathVariable Long planId
+    ) {
+        return ResponseEntity.ok(planService.getStationsByPlan(planId));
+    }
 }

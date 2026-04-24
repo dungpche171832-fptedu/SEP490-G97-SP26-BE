@@ -23,10 +23,10 @@ public interface PlanService {
             Long accountId,
             Long branchId
     );
-//
-//    PlanDetailResponse getPlanDetail(Long planId);
-//
-//    PlanResponse updatePlanStatus(Long planId, UpdatePlanStatusRequest request);
-//
-//    List<StationResponse> getStationsByPlan(Long planId);
+
+    PlanResponse getPlanDetail(Long planId);
+
+    PlanResponse updatePlanStatus(Long planId, UpdatePlanStatusRequest request);
+
+    List<StationResponse> getStationsByPlan(Long planId);
 }

@@ -10,6 +10,7 @@ import vn.edu.fpt.dto.request.plan.UpdatePlanStatusRequest;
 import vn.edu.fpt.dto.response.plan.*;
 import vn.edu.fpt.dto.response.planSeat.PlanSeatResponse;
 import vn.edu.fpt.dto.response.routeStation.RouteStationResponse;
+import vn.edu.fpt.dto.response.station.StationResponse;
 import vn.edu.fpt.entity.*;
 import vn.edu.fpt.exception.AppException;
 import vn.edu.fpt.repository.*;
@@ -35,6 +36,7 @@ public class PlanServiceImpl implements PlanService {
     private final SeatRepository seatRepository;
     private final RouteRepository routeRepository;
     private final BranchRepository branchRepository;
+    private final RouteStationRepository routeStationRepository;
 
 
     @Override
@@ -329,88 +331,92 @@ public class PlanServiceImpl implements PlanService {
                 .build();
     }
 
-//
-//    @Override
-//    @Transactional(readOnly = true)
-//    public PlanDetailResponse getPlanDetail(Long planId) {
-//        Plan plan = planRepository.findById(planId)
-//                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
-//
-//        return mapToPlanDetailResponse(plan);
-//    }
-//
-//    private PlanDetailResponse mapToPlanDetailResponse(Plan plan) {
-//        List<PlanStationResponse> stationResponses = plan.getPlanStations().stream()
-//                .sorted((a, b) -> Integer.compare(a.getStationOrder(), b.getStationOrder()))
-//                .map(planStation -> PlanStationResponse.builder()
-//                        .stationId(planStation.getStation().getId())
-//                        .stationName(planStation.getStation().getName())
-//                        .stationOrder(planStation.getStationOrder())
-//                        .build())
-//                .toList();
-//
-//        List<PlanSeatResponse> seatResponses = plan.getPlanSeats().stream()
-//                .sorted((a, b) -> Long.compare(a.getSeat().getId(), b.getSeat().getId()))
-//                .map(planSeat -> PlanSeatResponse.builder()
-//                        .seatId(planSeat.getSeat().getId())
-//                        .seatNumber(planSeat.getSeat().getSeatNumber())
-//                        .status(planSeat.getStatus().name())
-//                        .build())
-//                .toList();
-//
-//        return PlanDetailResponse.builder()
-//                .id(plan.getId())
-//                .code(plan.getCode())
-//                .carId(plan.getCar().getId())
-//                .carLicensePlate(plan.getCar().getLicensePlate())
-//                .accountId(plan.getAccount().getAccountId())
-//                .driverName(plan.getAccount().getFullName())
-//                .startTime(plan.getStartTime())
-//                .endTime(plan.getEndTime())
-//                .status(plan.getStatus())
-//                .stations(stationResponses)
-//                .seats(seatResponses)
-//                .build();
-//    }
-//
-//    @Override
-//    @Transactional
-//    public PlanResponse updatePlanStatus(Long planId, UpdatePlanStatusRequest request) {
-//        Plan plan = planRepository.findById(planId)
-//                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
-//
-//        String normalizedStatus = request.getStatus().trim().toUpperCase();
-//
-//        plan.setStatus(normalizedStatus);
-//
-//        Plan updatedPlan = planRepository.save(plan);
-//
-//        return mapToResponse(updatedPlan);
-//    }
-//
-//    @Override
-//    public List<StationResponse> getStationsByPlan(Long planId) {
-//
-//        // 1. Check plan tồn tại
-//        Plan plan = planRepository.findById(planId)
-//                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
-//
-//        // 2. Lấy danh sách station
-//        List<PlanStation> planStations = plan.getPlanStations();
-//
-//        // 3. Map sang response + sort theo order
-//        return planStations.stream()
-//                .sorted(Comparator.comparing(PlanStation::getStationOrder))
-//                .map(ps -> StationResponse.builder()
-//                        .id(ps.getStation().getId())
-//                        .name(ps.getStation().getName())
-//                        .code(ps.getStation().getCode())
-//                        .address(ps.getStation().getAddress())
-//                        .latitude(ps.getStation().getLatitude())
-//                        .longitude(ps.getStation().getLongitude())
-//                        .cityName(ps.getStation().getCity().getName())
-//                        .build()
-//                )
-//                .toList();
-//    }
+    @Override
+    public PlanResponse getPlanDetail(Long planId) {
+
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
+
+        Route route = plan.getRoute();
+
+        // lấy danh sách station theo route
+        List<RouteStation> routeStations =
+                routeStationRepository.findByRouteIdOrderByStationOrder(route.getId());
+
+        // map sang response
+        List<RouteStationResponse> stationResponses = routeStations.stream()
+                .map(rs -> RouteStationResponse.builder()
+                        .stationId(rs.getStation().getId())
+                        .stationName(rs.getStation().getName())
+                        .order(rs.getStationOrder())
+                        .build())
+                .toList();
+
+        return PlanResponse.builder()
+                .id(plan.getId())
+                .code(plan.getCode())
+
+                .carId(plan.getCar().getId())
+                .carLicensePlate(plan.getCar().getLicensePlate())
+
+                .accountId(plan.getAccount().getAccountId())
+                .driverName(plan.getAccount().getFullName())
+                .driverPhone(plan.getAccount().getPhone())
+
+                .branchId(plan.getBranch().getId())
+                .branchName(plan.getBranch().getName())
+
+                .routeId(route.getId())
+                .routeName(route.getName())
+
+                .startTime(plan.getStartTime())
+                .status(plan.getStatus())
+
+                .stations(stationResponses)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public PlanResponse updatePlanStatus(Long planId, UpdatePlanStatusRequest request) {
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
+
+        String normalizedStatus = request.getStatus().trim().toUpperCase();
+
+        plan.setStatus(normalizedStatus);
+
+        Plan updatedPlan = planRepository.save(plan);
+
+        return mapToResponse(updatedPlan);
+    }
+
+    @Override
+    public List<StationResponse> getStationsByPlan(Long planId) {
+
+        // 1. Check plan tồn tại
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
+
+        // 2. Lấy route từ plan
+        Route route = plan.getRoute();
+
+        // 3. Lấy danh sách route station (đã có order)
+        List<RouteStation> routeStations =
+                routeStationRepository.findByRouteIdOrderByStationOrder(route.getId());
+
+        // 4. Map sang response
+        return routeStations.stream()
+                .map(rs -> StationResponse.builder()
+                        .id(rs.getStation().getId())
+                        .name(rs.getStation().getName())
+                        .code(rs.getStation().getCode())
+                        .address(rs.getStation().getAddress())
+                        .latitude(rs.getStation().getLatitude())
+                        .longitude(rs.getStation().getLongitude())
+                        .cityName(rs.getStation().getCity().getName())
+                        .build()
+                )
+                .toList();
+    }
 }
