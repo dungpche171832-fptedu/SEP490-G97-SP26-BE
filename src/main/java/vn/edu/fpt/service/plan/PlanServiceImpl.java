@@ -14,7 +14,10 @@ import vn.edu.fpt.dto.response.station.StationResponse;
 import vn.edu.fpt.entity.*;
 import vn.edu.fpt.exception.AppException;
 import vn.edu.fpt.repository.*;
+import vn.edu.fpt.service.email.EmailService;
+import vn.edu.fpt.service.email.MailChangeDriverSender;
 import vn.edu.fpt.ultis.enums.PlanSeatStatus;
+import vn.edu.fpt.ultis.errorCode.AccountErrorCode;
 import vn.edu.fpt.ultis.errorCode.BranchErrorCode;
 import vn.edu.fpt.ultis.errorCode.PlanErrorCode;
 import vn.edu.fpt.ultis.errorCode.RouteErrorCode;
@@ -37,6 +40,8 @@ public class PlanServiceImpl implements PlanService {
     private final RouteRepository routeRepository;
     private final BranchRepository branchRepository;
     private final RouteStationRepository routeStationRepository;
+    private final PlanDriverHistoryRepository planDriverHistoryRepository;
+    private final EmailService emailService;
 
 
     @Override
@@ -418,5 +423,62 @@ public class PlanServiceImpl implements PlanService {
                         .build()
                 )
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public void changeDriver(Long planId, Long newDriverId) {
+
+        // 1. Plan
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
+
+        // 2. Driver mới
+        Account newDriver = accountRepository.findById(newDriverId)
+                .orElseThrow(() -> new AppException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        // 3. Validate role
+        if (newDriver.getRole().getRoleId()!=3) {
+            throw new AppException(AccountErrorCode.INVALID_ROLE);
+        }
+
+        // 4. Driver cũ
+        Account oldDriver = plan.getAccount();
+
+        // 5. Không trùng
+        if (oldDriver.getAccountId().equals(newDriverId)) {
+            throw new AppException(PlanErrorCode.CANNOT_CHANGE_DRIVER);
+        }
+
+        // 6. Check plan status
+        if ("RUNNING".equals(plan.getStatus()) || "DONE".equals(plan.getStatus())) {
+            throw new AppException(PlanErrorCode.CANNOT_CHANGE_DRIVER);
+        }
+
+        // 7. Check trùng lịch
+        boolean busy = planRepository.existsByAccountAccountIdAndStartTime(
+                newDriverId, plan.getStartTime()
+        );
+
+        if (busy) {
+            throw new AppException(PlanErrorCode.DRIVER_ALREADY_ASSIGNED);
+        }
+
+        // 8. Update
+        plan.setAccount(newDriver);
+        planRepository.save(plan);
+
+        // 9. Lưu history
+        planDriverHistoryRepository.save(
+                PlanDriverHistory.builder()
+                        .planId(planId)
+                        .oldDriverId(oldDriver.getAccountId())
+                        .newDriverId(newDriverId)
+                        .changedAt(LocalDateTime.now())
+                        .build()
+        );
+
+        // 10. Gửi mail (async)
+        emailService.sendChangeDriverEmail(oldDriver, newDriver, plan);
     }
 }

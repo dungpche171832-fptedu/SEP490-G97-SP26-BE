@@ -6,6 +6,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.dto.request.plan.AddPlanRequest;
+import vn.edu.fpt.dto.request.plan.ChangeDriverRequest;
 import vn.edu.fpt.dto.request.plan.UpdatePlanStatusRequest;
 import vn.edu.fpt.dto.response.plan.PlanDetailResponse;
 import vn.edu.fpt.dto.response.plan.PlanListResponse;
@@ -62,5 +63,14 @@ public class PlanController {
             @PathVariable Long planId
     ) {
         return ResponseEntity.ok(planService.getStationsByPlan(planId));
+    }
+
+    @PutMapping("/{planId}/change-driver")
+    public ResponseEntity<?> changeDriver(
+            @PathVariable Long planId,
+            @RequestBody ChangeDriverRequest request
+    ) {
+        planService.changeDriver(planId, request.getNewDriverId());
+        return ResponseEntity.ok("Change driver successfully");
     }
 }

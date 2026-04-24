@@ -29,4 +29,6 @@ public interface PlanService {
     PlanResponse updatePlanStatus(Long planId, UpdatePlanStatusRequest request);
 
     List<StationResponse> getStationsByPlan(Long planId);
+
+    void changeDriver(Long planId, Long newDriverId);
 }
