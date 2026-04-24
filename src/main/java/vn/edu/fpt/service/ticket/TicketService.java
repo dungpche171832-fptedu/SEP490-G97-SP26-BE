@@ -15,4 +15,8 @@ public interface TicketService {
     TicketResponse getTicketDetail(Long ticketId);
 
     TicketResponse updateTicketStatus(Long ticketId, String newStatus);
+
+    void changeTicketPlan(Long ticketId,
+                          Long newPlanId,
+                          List<Long> newSeatIds);
 }

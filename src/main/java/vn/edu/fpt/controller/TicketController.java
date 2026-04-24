@@ -3,6 +3,7 @@ package vn.edu.fpt.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.edu.fpt.dto.request.ticket.ChangeTicketPlanRequest;
 import vn.edu.fpt.dto.request.ticket.CreateTicketRequest;
 import vn.edu.fpt.dto.response.ticket.TicketAddResponse;
 import vn.edu.fpt.dto.response.ticket.TicketListResponse;
@@ -47,5 +48,19 @@ public class TicketController {
     public ResponseEntity<TicketResponse> updateTicketStatus(@PathVariable Long ticketId, @RequestBody String newStatus) {
         TicketResponse updatedTicket = ticketService.updateTicketStatus(ticketId, newStatus);
         return ResponseEntity.ok(updatedTicket);
+    }
+
+    @PutMapping("/{ticketId}/change-plan")
+    public ResponseEntity<?> changeTicketPlan(
+            @PathVariable Long ticketId,
+            @RequestBody ChangeTicketPlanRequest request
+    ) {
+        ticketService.changeTicketPlan(
+                ticketId,
+                request.getNewPlanId(),
+                request.getNewSeatIds()
+        );
+
+        return ResponseEntity.ok("Change ticket plan successfully");
     }
 }

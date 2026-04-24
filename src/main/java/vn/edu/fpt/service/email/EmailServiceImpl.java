@@ -114,4 +114,55 @@ public class EmailServiceImpl implements EmailService {
 
         mailChangeSender.send(passenger.getEmail(), "Thông báo đổi xe", content);
     }
+
+    @Override
+    public void sendChangeTicketPlan(Account passenger,
+                                     Ticket ticket,
+                                     Plan oldPlan,
+                                     Plan newPlan,
+                                     List<PlanSeat> oldSeats,
+                                     List<PlanSeat> newSeats) {
+
+        String oldSeatNames = oldSeats.stream()
+                .map(s -> s.getSeat().getSeatNumber())
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+
+        String newSeatNames = newSeats.stream()
+                .map(s -> s.getSeat().getSeatNumber())
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+
+        String content = """
+            THÔNG BÁO ĐỔI CHUYẾN
+            
+            Do gặp một số sự cố ngoài ý muốn, chúng tôi xin phép được chuyển đổi chuyến của: 
+            Mã vé: %s
+            
+            Từ:
+            --- CHUYẾN CŨ ---
+            Mã plan: %s
+            Thời gian: %s
+            Ghế: %s
+            
+            Sang:
+            --- CHUYẾN MỚI ---
+            Mã plan: %s
+            Thời gian: %s
+            Ghế: %s
+                
+            Quý khách vui lòng kiểm tra lại thông tin. Xin lỗi quý khách vì sự bất tiện này.
+            Trân trọng.
+            """.formatted(
+                ticket.getBookingCode(),
+                oldPlan.getCode(),
+                oldPlan.getStartTime(),
+                oldSeatNames,
+                newPlan.getCode(),
+                newPlan.getStartTime(),
+                newSeatNames
+        );
+
+        mailChangeSender.send(passenger.getEmail(), "Thay đổi chuyến đi", content);
+    }
 }

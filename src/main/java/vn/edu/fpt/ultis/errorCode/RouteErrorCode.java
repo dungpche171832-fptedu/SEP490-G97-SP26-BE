@@ -16,8 +16,8 @@ public enum RouteErrorCode implements BaseErrorCode {
     STATION_LIST_EMPTY(OK, "ROU-004", "Danh sách station không được rỗng", new HashMap<>()),
     STATION_NOT_FOUND(OK, "ROU-005", "Station không tồn tại", new HashMap<>()),
     ROUTE_NOT_FOUND(OK, "ROU-006", "Station không tồn tại", new HashMap<>()),
+    ROUTE_NOT_MATCH(OK, "ROU-007", "Chuyến đi không hợp lệ", new HashMap<>()),
     ;
-
     private final HttpStatusCode statusCode;
     private final String code;
     private final String message;

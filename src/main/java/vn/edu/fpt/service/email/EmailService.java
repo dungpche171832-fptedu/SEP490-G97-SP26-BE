@@ -17,4 +17,11 @@ public interface EmailService {
                                 Car newCar,
                                 Ticket ticket,
                                 List<PlanSeat> seats);
+
+    void sendChangeTicketPlan(Account passenger,
+                              Ticket ticket,
+                              Plan oldPlan,
+                              Plan newPlan,
+                              List<PlanSeat> oldSeats,
+                              List<PlanSeat> newSeats);
 }

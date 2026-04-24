@@ -25,7 +25,9 @@ public enum PlanErrorCode implements BaseErrorCode {
     SEAT_NOT_FOUND_IN_PLAN(OK, "PLAN-013", "Lịch trình không chứa ghế này", new HashMap<>()),
     SEAT_ALREADY_BOOKED(OK, "PLAN-014", "Ghế đã được đặt", new HashMap<>()),
     DRIVER_ALREADY_ASSIGNED(OK, "PLAN-015", "Tài xế đã có lịch trong ngày", new HashMap<>()),
-    CANNOT_CHANGE_DRIVER(OK, "PLAN-016", "Tài xế không thể đổi tài xế", new HashMap<>())
+    CANNOT_CHANGE_DRIVER(OK, "PLAN-016", "Tài xế không thể đổi tài xế", new HashMap<>()),
+    START_DATE_NOT_MATCH(OK, "PLAN-017", "Ngày xuất phát không hợp lệ", new HashMap<>()),
+    SEAT_COUNT_NOT_MATCH(OK, "PLAN-018", "Số lượng ghế không hợp lệ", new HashMap<>()),
     ;
 
     private final HttpStatusCode statusCode;
