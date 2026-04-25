@@ -24,4 +24,8 @@ public interface EmailService {
                               Plan newPlan,
                               List<PlanSeat> oldSeats,
                               List<PlanSeat> newSeats);
+
+    void sendTicketBooked(Ticket ticket);
+
+    void sendTicketCancelled(Ticket ticket);
 }

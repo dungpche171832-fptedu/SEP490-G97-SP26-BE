@@ -21,6 +21,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+
+
 @Service
 @RequiredArgsConstructor
 public class TicketServiceImpl implements TicketService {
@@ -190,27 +192,51 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    @Transactional
     public TicketResponse updateTicketStatus(Long ticketId, String newStatus) {
-        Optional<Ticket> ticketOptional = ticketRepository.findById(ticketId);
 
-        if (ticketOptional.isEmpty()) {
-            throw new AppException(TicketErrorCode.TICKET_NOT_FOUND);
-        }
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new AppException(TicketErrorCode.TICKET_NOT_FOUND));
 
-        Ticket ticket = ticketOptional.get();
+        TicketStatus oldStatus = ticket.getStatus();
 
-        // Chuyển String thành TicketStatus enum, đảm bảo luôn chuyển thành chữ hoa
+        TicketStatus status;
         try {
-            ticket.setStatus(TicketStatus.valueOf(newStatus.toUpperCase()));  // Chuyển String thành TicketStatus enum
+            status = TicketStatus.valueOf(newStatus.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new AppException(TicketErrorCode.TICKET_STATUS_NOT_FOUND);
         }
 
-        // Lưu lại vé với status đã thay đổi
+        // tránh update trùng
+        if (oldStatus == status) {
+            return new TicketResponse(ticket);
+        }
+
+        ticket.setStatus(status);
         Ticket updatedTicket = ticketRepository.save(ticket);
 
-        // Trả về TicketResponse đã được cập nhật
+        // xử lý sau khi đổi status
+        handleAfterStatusChange(updatedTicket);
+
         return new TicketResponse(updatedTicket);
+    }
+
+    private void handleAfterStatusChange(Ticket ticket) {
+
+        switch (ticket.getStatus()) {
+
+            case BOOKED -> emailService.sendTicketBooked(ticket);
+
+            case CANCELLED -> emailService.sendTicketCancelled(ticket);
+
+            case COMPLETED -> {
+                // không gửi mail
+            }
+
+            default -> {
+                // PENDING hoặc trạng thái khác
+            }
+        }
     }
 
     @Transactional

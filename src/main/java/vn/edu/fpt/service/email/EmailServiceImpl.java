@@ -7,6 +7,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.entity.*;
+import vn.edu.fpt.repository.PlanSeatRepository;
 import vn.edu.fpt.service.email.EmailService;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
     private final MailChangeSender mailChangeSender;
+    private final PlanSeatRepository planSeatRepository;
 
     @Override
     public void sendOtp(String to, String otp) {
@@ -164,5 +166,56 @@ public class EmailServiceImpl implements EmailService {
         );
 
         mailChangeSender.send(passenger.getEmail(), "Thay đổi chuyến đi", content);
+    }
+
+    @Override
+    public void sendTicketBooked(Ticket ticket) {
+
+        List<PlanSeat> seats =
+                planSeatRepository.findByTicketId(ticket.getId());
+
+        String seatNames = seats.stream()
+                .map(s -> s.getSeat().getSeatNumber())
+                .collect(Collectors.joining(", "));
+
+        String content = """
+                VÉ ĐÃ ĐƯỢC XÁC NHẬN
+
+                Mã vé: %s
+                Mã lịch trình: %s
+                Thời gian: %s
+                Ghế: %s
+
+                Cảm ơn bạn đã sử dụng dịch vụ.
+                """.formatted(
+                ticket.getBookingCode(),
+                ticket.getPlan().getCode(),
+                ticket.getPlan().getStartTime(),
+                seatNames
+        );
+
+        mailChangeSender.send(
+                ticket.getAccount().getEmail(),
+                "Xác nhận vé",
+                content
+        );
+    }
+
+    @Override
+    public void sendTicketCancelled(Ticket ticket) {
+
+        String content = """
+                VÉ ĐÃ BỊ HỦY
+
+                Mã vé: %s
+
+                Nếu có thắc mắc vui lòng liên hệ nhà xe.
+                """.formatted(ticket.getBookingCode());
+
+        mailChangeSender.send(
+                ticket.getAccount().getEmail(),
+                "Hủy vé",
+                content
+        );
     }
 }

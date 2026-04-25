@@ -45,9 +45,13 @@ public class TicketController {
     }
 
     @PutMapping("/{ticketId}/status")
-    public ResponseEntity<TicketResponse> updateTicketStatus(@PathVariable Long ticketId, @RequestBody String newStatus) {
-        TicketResponse updatedTicket = ticketService.updateTicketStatus(ticketId, newStatus);
-        return ResponseEntity.ok(updatedTicket);
+    public ResponseEntity<TicketResponse> updateStatus(
+            @PathVariable Long ticketId,
+            @RequestParam String status
+    ) {
+        return ResponseEntity.ok(
+                ticketService.updateTicketStatus(ticketId, status)
+        );
     }
 
     @PutMapping("/{ticketId}/change-plan")
