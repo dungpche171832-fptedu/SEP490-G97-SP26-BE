@@ -1,4 +1,4 @@
-package vn.edu.fpt.dto.response;
+package vn.edu.fpt.dto.response.route;
 
 import lombok.Builder;
 import lombok.Data;
