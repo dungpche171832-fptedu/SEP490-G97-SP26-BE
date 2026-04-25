@@ -69,7 +69,7 @@ public class TicketServiceImpl implements TicketService {
         // HOLD GHẾ
         holdSeats(seats, ticket);
 
-        return mapToResponse(ticket);
+        return mapToAddResponse(ticket);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class TicketServiceImpl implements TicketService {
 
         handleAfterStatusChange(saved);
 
-        return new TicketResponse(saved);
+        return mapToResponse(saved);
     }
 
     @Override
@@ -173,7 +173,9 @@ public class TicketServiceImpl implements TicketService {
         }
 
         return TicketListResponse.builder()
-                .tickets(tickets.stream().map(TicketResponse::new).toList())
+                .tickets(tickets.stream()
+                        .map(this::mapToResponse)
+                        .toList())
                 .message("Danh sách vé")
                 .totalCount(tickets.size())
                 .build();
@@ -181,7 +183,7 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public TicketResponse getTicketDetail(Long ticketId) {
-        return new TicketResponse(getTicket(ticketId));
+        return mapToResponse(getTicket(ticketId));
     }
 
     // =====================================================
@@ -314,7 +316,7 @@ public class TicketServiceImpl implements TicketService {
         }
     }
 
-    private TicketAddResponse mapToResponse(Ticket ticket) {
+    private TicketAddResponse mapToAddResponse(Ticket ticket) {
         return TicketAddResponse.builder()
                 .id(ticket.getId())
                 .bookingCode(ticket.getBookingCode())
@@ -327,6 +329,42 @@ public class TicketServiceImpl implements TicketService {
                 .distanceKm(ticket.getDistanceKm())
                 .totalAmount(ticket.getTotalAmount())
                 .status(ticket.getStatus().name())
+                .build();
+    }
+
+    private TicketResponse mapToResponse(Ticket ticket) {
+
+        List<PlanSeat> seats = planSeatRepository.findByTicketId(ticket.getId());
+
+        List<String> seatNumbers = seats.stream()
+                .map(ps -> ps.getSeat().getSeatNumber())
+                .toList();
+
+        return TicketResponse.builder()
+                .id(ticket.getId())
+                .bookingCode(ticket.getBookingCode())
+
+                .planId(ticket.getPlan().getId())
+                .planCode(ticket.getPlan().getCode())
+
+                .carId(ticket.getCar().getId())
+                .carLicensePlate(ticket.getCar().getLicensePlate())
+
+                .branchId(ticket.getBranch().getId())
+                .branchName(ticket.getBranch().getName())
+
+                .accountId(ticket.getAccount().getAccountId())
+                .accountName(ticket.getAccount().getFullName())
+
+                .distanceKm(ticket.getDistanceKm())
+                .totalAmount(ticket.getTotalAmount())
+
+                .status(ticket.getStatus().name())
+                .note(ticket.getNote())
+
+                .startTime(ticket.getPlan().getStartTime())
+
+                .seatNumbers(seatNumbers) // ⭐ list ghế
                 .build();
     }
 }
