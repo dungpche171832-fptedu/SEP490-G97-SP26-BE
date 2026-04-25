@@ -184,6 +184,7 @@ public class EmailServiceImpl implements EmailService {
                 Mã vé: %s
                 Mã lịch trình: %s
                 Thời gian: %s
+                Xe: %S
                 Ghế: %s
 
                 Cảm ơn bạn đã sử dụng dịch vụ.
@@ -191,6 +192,7 @@ public class EmailServiceImpl implements EmailService {
                 ticket.getBookingCode(),
                 ticket.getPlan().getCode(),
                 ticket.getPlan().getStartTime(),
+                ticket.getCar(),
                 seatNames
         );
 

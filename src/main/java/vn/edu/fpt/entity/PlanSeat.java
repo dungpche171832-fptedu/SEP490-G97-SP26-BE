@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import vn.edu.fpt.ultis.enums.PlanSeatStatus;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(
         name = "plan_seat",
@@ -44,4 +46,7 @@ public class PlanSeat extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id", nullable = true)  // nullable = true để trường này có thể rỗng
     private Ticket ticket;
+
+    @Column(name = "hold_expired_at")
+    private LocalDateTime holdExpiredAt;
 }

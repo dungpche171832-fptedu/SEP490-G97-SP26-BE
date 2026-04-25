@@ -6,9 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.dto.request.ticket.CreateTicketRequest;
-import vn.edu.fpt.dto.response.ticket.TicketAddResponse;
-import vn.edu.fpt.dto.response.ticket.TicketListResponse;
-import vn.edu.fpt.dto.response.ticket.TicketResponse;
+import vn.edu.fpt.dto.response.ticket.*;
 import vn.edu.fpt.entity.*;
 import vn.edu.fpt.exception.AppException;
 import vn.edu.fpt.repository.*;
@@ -19,9 +17,6 @@ import vn.edu.fpt.ultis.errorCode.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-
-
 
 @Service
 @RequiredArgsConstructor
@@ -39,44 +34,27 @@ public class TicketServiceImpl implements TicketService {
     @Transactional
     public TicketAddResponse createTicket(CreateTicketRequest request) {
 
-        // 1. Lấy account từ token
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
+        Account account = getCurrentAccount();
 
-        Account account = accountRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+        Plan plan = getPlan(request.getPlanId());
+        Car car = getCar(request.getCarId());
 
-        // 2. Lấy plan
-        Plan plan = planRepository.findById(request.getPlanId())
-                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
+        Station startStation = getStation(request.getStartStationId());
+        Station endStation = getOptionalStation(request.getEndStationId());
 
-        // 3. Lấy car
-        Car car = carRepository.findById(request.getCarId())
-                .orElseThrow(() -> new AppException(CarErrorCode.CAR_NOT_FOUND));
+        // LOCK GHẾ
+        List<PlanSeat> seats = planSeatRepository
+                .findAllForUpdate(plan.getId(), request.getSeatIds());
 
-        // 4. Lấy branch từ car
-        Branch branch = car.getBranch();
+        validateSeatsExist(seats, request.getSeatIds());
+        validateSeatsAvailable(seats);
 
-        // 5. Lấy station
-        Station startStation = stationRepository.findById(request.getStartStationId())
-                .orElseThrow(() -> new AppException(StationErrorCode.STATION_NOT_FOUND));
-
-        Station endStation = null;
-        if (request.getEndStationId() != null) {
-            endStation = stationRepository.findById(request.getEndStationId())
-                    .orElseThrow(() -> new AppException(StationErrorCode.STATION_NOT_FOUND));
-        }
-
-        // 6. Generate booking code
-        String bookingCode = "TICKET-" + System.currentTimeMillis();
-
-        // 7. Tạo ticket
+        // CREATE TICKET
         Ticket ticket = Ticket.builder()
-                .bookingCode(bookingCode)
+                .bookingCode(generateBookingCode())
                 .plan(plan)
                 .car(car)
-                .branch(branch)
+                .branch(car.getBranch())
                 .account(account)
                 .startStation(startStation)
                 .endStation(endStation)
@@ -87,31 +65,255 @@ public class TicketServiceImpl implements TicketService {
                 .build();
 
         ticketRepository.save(ticket);
-        // 8. Update plan seat
-        List<PlanSeat> planSeats = planSeatRepository
-                .findAllByPlanIdAndSeatIdIn(plan.getId(), request.getSeatIds());
 
-        if (planSeats.size() != request.getSeatIds().size()) {
-            throw new AppException(PlanErrorCode.SEAT_NOT_FOUND_IN_PLAN);
-        }
-
-        for (PlanSeat ps : planSeats) {
-            if (ps.getTicket() != null) {
-                throw new AppException(PlanErrorCode.SEAT_ALREADY_BOOKED);
-            }
-        }
-
-        for (PlanSeat ps : planSeats) {
-            ps.setTicket(ticket);
-            ps.setStatus(PlanSeatStatus.BOOKED);
-        }
-
-        planSeatRepository.saveAll(planSeats);
+        // HOLD GHẾ
+        holdSeats(seats, ticket);
 
         return mapToResponse(ticket);
     }
 
-    // ===== PRIVATE MAPPER =====
+    @Override
+    @Transactional
+    public TicketResponse updateTicketStatus(Long ticketId, String newStatus) {
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new AppException(TicketErrorCode.TICKET_NOT_FOUND));
+
+        TicketStatus status = parseStatus(newStatus);
+        ticket.setStatus(status);
+
+        List<PlanSeat> seats = planSeatRepository.findByTicketId(ticketId);
+
+        switch (status) {
+            case BOOKED -> confirmSeats(seats);
+            case CANCELLED -> releaseSeats(seats);
+            default -> {}
+        }
+
+        planSeatRepository.saveAll(seats);
+
+        Ticket saved = ticketRepository.save(ticket);
+
+        handleAfterStatusChange(saved);
+
+        return new TicketResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public void changeTicketPlan(Long ticketId, Long newPlanId, List<Long> newSeatIds) {
+
+        Ticket ticket = getTicket(ticketId);
+
+        if (ticket.getStatus() != TicketStatus.BOOKED) {
+            throw new AppException(TicketErrorCode.SEAT_IS_NOT_BOOKED);
+        }
+
+        Plan oldPlan = ticket.getPlan();
+        Plan newPlan = getPlan(newPlanId);
+
+        validatePlanChange(oldPlan, newPlan);
+
+        //  LOCK GHẾ MỚI
+        List<PlanSeat> newSeats = planSeatRepository
+                .findAllForUpdate(newPlanId, newSeatIds);
+
+        validateSeatsExist(newSeats, newSeatIds);
+        validateSeatsAvailable(newSeats);
+
+        List<PlanSeat> oldSeats =
+                planSeatRepository.findByTicketIdForUpdate(ticketId);
+        if (oldSeats.size() != newSeatIds.size()) {
+            throw new AppException(PlanErrorCode.SEAT_COUNT_NOT_MATCH);
+        }
+
+        // CLEAR GHẾ CŨ
+        releaseSeats(oldSeats);
+
+        // GÁN GHẾ MỚI
+        for (PlanSeat seat : newSeats) {
+            seat.setTicket(ticket);
+            seat.setStatus(PlanSeatStatus.BOOKED);
+        }
+
+        planSeatRepository.saveAll(newSeats);
+
+        // UPDATE TICKET
+        ticket.setPlan(newPlan);
+        ticket.setCar(newPlan.getCar());
+        ticketRepository.save(ticket);
+
+        // EMAIL
+        emailService.sendChangeTicketPlan(
+                ticket.getAccount(), ticket, oldPlan, newPlan, oldSeats, newSeats
+        );
+    }
+
+    @Override
+    public TicketListResponse getTickets(Long planId, Long branchId, Long accountId) {
+
+        Specification<Ticket> spec = (root, query, cb) -> cb.conjunction();
+
+        if (planId != null) {
+            spec = spec.and((r, q, cb) -> cb.equal(r.get("plan").get("id"), planId));
+        }
+
+        if (branchId != null) {
+            spec = spec.and((r, q, cb) -> cb.equal(r.get("branch").get("id"), branchId));
+        }
+
+        if (accountId != null) {
+            spec = spec.and((r, q, cb) -> cb.equal(r.get("account").get("accountId"), accountId));
+        }
+
+        List<Ticket> tickets = ticketRepository.findAll(spec);
+
+        if (tickets.isEmpty()) {
+            throw new AppException(TicketErrorCode.TICKET_NOT_FOUND);
+        }
+
+        return TicketListResponse.builder()
+                .tickets(tickets.stream().map(TicketResponse::new).toList())
+                .message("Danh sách vé")
+                .totalCount(tickets.size())
+                .build();
+    }
+
+    @Override
+    public TicketResponse getTicketDetail(Long ticketId) {
+        return new TicketResponse(getTicket(ticketId));
+    }
+
+    // =====================================================
+    // PRIVATE METHODS
+    // =====================================================
+
+    private Account getCurrentAccount() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return accountRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+    }
+
+    private Plan getPlan(Long id) {
+        return planRepository.findById(id)
+                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
+    }
+
+    private Car getCar(Long id) {
+        return carRepository.findById(id)
+                .orElseThrow(() -> new AppException(CarErrorCode.CAR_NOT_FOUND));
+    }
+
+    private Station getStation(Long id) {
+        return stationRepository.findById(id)
+                .orElseThrow(() -> new AppException(StationErrorCode.STATION_NOT_FOUND));
+    }
+
+    private Station getOptionalStation(Long id) {
+        if (id == null) return null;
+        return getStation(id);
+    }
+
+    private Ticket getTicket(Long id) {
+        return ticketRepository.findById(id)
+                .orElseThrow(() -> new AppException(TicketErrorCode.TICKET_NOT_FOUND));
+    }
+
+    private String generateBookingCode() {
+        return "TICKET-" + System.currentTimeMillis();
+    }
+
+    private TicketStatus parseStatus(String status) {
+        try {
+            return TicketStatus.valueOf(status.toUpperCase());
+        } catch (Exception e) {
+            throw new AppException(TicketErrorCode.TICKET_STATUS_NOT_FOUND);
+        }
+    }
+
+    private void validateSeatsExist(List<PlanSeat> seats, List<Long> seatIds) {
+        if (seats.size() != seatIds.size()) {
+            throw new AppException(PlanErrorCode.SEAT_NOT_FOUND_IN_PLAN);
+        }
+    }
+
+    private void validateSeatsAvailable(List<PlanSeat> seats) {
+
+        boolean needUpdate = false;
+
+        for (PlanSeat ps : seats) {
+
+            // xử lý HOLD hết hạn
+            if (ps.getStatus() == PlanSeatStatus.HOLD &&
+                    ps.getHoldExpiredAt() != null &&
+                    ps.getHoldExpiredAt().isBefore(LocalDateTime.now())) {
+
+                ps.setStatus(PlanSeatStatus.AVAILABLE);
+                ps.setTicket(null);
+                ps.setHoldExpiredAt(null);
+
+                needUpdate = true;
+            }
+
+            if (ps.getStatus() != PlanSeatStatus.AVAILABLE) {
+                throw new AppException(PlanErrorCode.SEAT_ALREADY_BOOKED);
+            }
+        }
+
+        if (needUpdate) {
+            planSeatRepository.saveAll(seats);
+        }
+    }
+
+    private void holdSeats(List<PlanSeat> seats, Ticket ticket) {
+        for (PlanSeat ps : seats) {
+            ps.setTicket(ticket);
+            ps.setStatus(PlanSeatStatus.HOLD);
+            ps.setHoldExpiredAt(LocalDateTime.now().plusMinutes(15));
+        }
+        planSeatRepository.saveAll(seats);
+    }
+
+    private void confirmSeats(List<PlanSeat> seats) {
+        for (PlanSeat ps : seats) {
+            ps.setStatus(PlanSeatStatus.BOOKED);
+            ps.setHoldExpiredAt(null);
+        }
+    }
+
+    private void releaseSeats(List<PlanSeat> seats) {
+        for (PlanSeat ps : seats) {
+            ps.setStatus(PlanSeatStatus.AVAILABLE);
+            ps.setTicket(null);
+            ps.setHoldExpiredAt(null);
+        }
+    }
+
+    private void validatePlanChange(Plan oldPlan, Plan newPlan) {
+
+        if (!oldPlan.getRoute().getId().equals(newPlan.getRoute().getId())) {
+            throw new AppException(RouteErrorCode.ROUTE_NOT_MATCH);
+        }
+
+        if (!oldPlan.getCar().getCarType()
+                .equals(newPlan.getCar().getCarType())) {
+            throw new AppException(CarErrorCode.CAR_TYPE_NOT_MATCH);
+        }
+
+        if (!oldPlan.getStartTime().toLocalDate()
+                .equals(newPlan.getStartTime().toLocalDate())) {
+            throw new AppException(PlanErrorCode.START_DATE_NOT_MATCH);
+        }
+    }
+
+    private void handleAfterStatusChange(Ticket ticket) {
+        switch (ticket.getStatus()) {
+            case BOOKED -> emailService.sendTicketBooked(ticket);
+            case CANCELLED -> emailService.sendTicketCancelled(ticket);
+            default -> {}
+        }
+    }
+
     private TicketAddResponse mapToResponse(Ticket ticket) {
         return TicketAddResponse.builder()
                 .id(ticket.getId())
@@ -127,198 +329,4 @@ public class TicketServiceImpl implements TicketService {
                 .status(ticket.getStatus().name())
                 .build();
     }
-
-    @Override
-    @Transactional
-    public TicketListResponse getTickets(Long planId, Long branchId, Long accountId) {
-        // Sử dụng Specification để tạo truy vấn động
-        Specification<Ticket> spec = (root, query, cb) -> cb.conjunction();
-
-        // Lọc theo planId nếu có
-        if (planId != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(root.get("plan").get("id"), planId)
-            );
-        }
-
-        // Lọc theo branchId nếu có
-        if (branchId != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(root.get("branch").get("id"), branchId)
-            );
-        }
-
-        // Lọc theo accountId nếu có
-        if (accountId != null) {
-            spec = spec.and((root, query, cb) ->
-                    cb.equal(root.get("account").get("id"), accountId)
-            );
-        }
-
-        // Truy vấn tất cả các vé theo specification
-        List<Ticket> tickets = ticketRepository.findAll(spec);
-
-        // Nếu không tìm thấy vé nào, trả về lỗi
-        if (tickets.isEmpty()) {
-            throw new AppException(TicketErrorCode.TICKET_NOT_FOUND);
-        }
-
-        // Chuyển đổi danh sách vé thành danh sách `TicketResponse`
-        List<TicketResponse> ticketResponses = tickets.stream()
-                .map(TicketResponse::new)
-                .toList();
-
-        // Trả về TicketListResponse bao gồm danh sách vé, thông báo và tổng số vé
-        return TicketListResponse.builder()
-                .tickets(ticketResponses)
-                .message("Danh sách vé")
-                .totalCount(ticketResponses.size())
-                .build();
-    }
-
-    @Override
-    public TicketResponse getTicketDetail(Long ticketId) {
-        // Lấy thông tin Ticket từ cơ sở dữ liệu bằng ID
-        Optional<Ticket> ticketOptional = ticketRepository.findById(ticketId);
-
-        // Kiểm tra nếu vé không tồn tại, ném AppException
-        if (ticketOptional.isEmpty()) {
-            throw new AppException(TicketErrorCode.TICKET_NOT_FOUND);
-        }
-
-        // Nếu vé tồn tại, chuyển đối tượng Ticket thành TicketResponse
-        Ticket ticket = ticketOptional.get();
-        return new TicketResponse(ticket);  // Chuyển đổi Ticket thành TicketResponse
-    }
-
-    @Override
-    @Transactional
-    public TicketResponse updateTicketStatus(Long ticketId, String newStatus) {
-
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new AppException(TicketErrorCode.TICKET_NOT_FOUND));
-
-        TicketStatus oldStatus = ticket.getStatus();
-
-        TicketStatus status;
-        try {
-            status = TicketStatus.valueOf(newStatus.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new AppException(TicketErrorCode.TICKET_STATUS_NOT_FOUND);
-        }
-
-        // tránh update trùng
-        if (oldStatus == status) {
-            return new TicketResponse(ticket);
-        }
-
-        ticket.setStatus(status);
-        Ticket updatedTicket = ticketRepository.save(ticket);
-
-        // xử lý sau khi đổi status
-        handleAfterStatusChange(updatedTicket);
-
-        return new TicketResponse(updatedTicket);
-    }
-
-    private void handleAfterStatusChange(Ticket ticket) {
-
-        switch (ticket.getStatus()) {
-
-            case BOOKED -> emailService.sendTicketBooked(ticket);
-
-            case CANCELLED -> emailService.sendTicketCancelled(ticket);
-
-            case COMPLETED -> {
-                // không gửi mail
-            }
-
-            default -> {
-                // PENDING hoặc trạng thái khác
-            }
-        }
-    }
-
-    @Transactional
-    public void changeTicketPlan(Long ticketId,
-                                 Long newPlanId,
-                                 List<Long> newSeatIds) {
-
-        Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new AppException(TicketErrorCode.TICKET_NOT_FOUND));
-
-        Plan oldPlan = ticket.getPlan();
-
-        Plan newPlan = planRepository.findById(newPlanId)
-                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
-
-        // ===== VALIDATE =====
-
-        if (!oldPlan.getRoute().getId().equals(newPlan.getRoute().getId())) {
-            throw new AppException(RouteErrorCode.ROUTE_NOT_MATCH);
-        }
-
-        if (!oldPlan.getCar().getCarType()
-                .equals(newPlan.getCar().getCarType())) {
-            throw new AppException(CarErrorCode.CAR_TYPE_NOT_MATCH);
-        }
-
-        if (!oldPlan.getStartTime().toLocalDate()
-                .equals(newPlan.getStartTime().toLocalDate())) {
-            throw new AppException(PlanErrorCode.START_DATE_NOT_MATCH);
-        }
-
-        // ===== GHẾ CŨ =====
-        List<PlanSeat> oldSeats = planSeatRepository.findByTicketId(ticketId);
-
-        // check số lượng ghế
-        if (oldSeats.size() != newSeatIds.size()) {
-            throw new AppException(PlanErrorCode.SEAT_COUNT_NOT_MATCH);
-        }
-
-        // ===== GHẾ MỚI =====
-        List<PlanSeat> newSeats = planSeatRepository
-                .findAllByPlanIdAndSeatIdIn(newPlanId, newSeatIds);
-
-        if (newSeats.size() != newSeatIds.size()) {
-            throw new AppException(PlanErrorCode.SEAT_COUNT_NOT_MATCH);
-        }
-
-        // check ghế đã bị book chưa
-        for (PlanSeat seat : newSeats) {
-            if (seat.getTicket() != null) {
-                throw new AppException(TicketErrorCode.SEAT_ALREADY_BOOKED);
-            }
-        }
-
-        // ===== CLEAR GHẾ CŨ =====
-        oldSeats.forEach(s -> {
-            s.setTicket(null);
-            s.setStatus(PlanSeatStatus.AVAILABLE);
-        });
-        planSeatRepository.saveAll(oldSeats);
-
-        // ===== GÁN GHẾ MỚI =====
-        for (PlanSeat seat : newSeats) {
-            seat.setTicket(ticket);
-            seat.setStatus(PlanSeatStatus.BOOKED);
-        }
-        planSeatRepository.saveAll(newSeats);
-
-        // ===== UPDATE TICKET =====
-        ticket.setPlan(newPlan);
-        ticket.setCar(newPlan.getCar());
-        ticketRepository.save(ticket);
-
-        // ===== EMAIL =====
-        emailService.sendChangeTicketPlan(
-                ticket.getAccount(),
-                ticket,
-                oldPlan,
-                newPlan,
-                oldSeats,
-                newSeats
-        );
-    }
 }
-

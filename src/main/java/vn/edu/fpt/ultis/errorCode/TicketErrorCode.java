@@ -12,6 +12,7 @@ public enum TicketErrorCode implements BaseErrorCode {
     TICKET_NOT_FOUND(OK, "TIC-001", "Vé không tồn tại", new HashMap<>()),
     TICKET_STATUS_NOT_FOUND(OK, "TIC-002", "Trạng thái không tồn tại", new HashMap<>()),
     SEAT_ALREADY_BOOKED(OK, "TIC-003", "Ghế đã được đặt, vui lòng chọn ghế khác", new HashMap<>()),
+    SEAT_IS_NOT_BOOKED(OK, "TIC-004", "Ghế chưa được đặt, chỉ vé đã đặt mới có thể đổi", new HashMap<>()),
     ;
     private final HttpStatusCode statusCode;
     private final String code; // Đảm bảo `code` là String
