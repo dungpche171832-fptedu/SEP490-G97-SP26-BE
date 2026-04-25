@@ -11,5 +11,6 @@ public class AddPlanRequest {
     private Long accountId;
     private Long branchId;
     private LocalDateTime startTime;
+    private LocalDateTime returnStartTime;
     private String status;
 }

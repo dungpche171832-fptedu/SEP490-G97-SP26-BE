@@ -51,6 +51,14 @@ public class PlanServiceImpl implements PlanService {
             throw new AppException(PlanErrorCode.PLAN_CODE_ALREADY_EXISTS);
         }
 
+        if (request.getReturnStartTime() == null) {
+            throw new AppException(PlanErrorCode.RETURN_TIME_REQUIRED);
+        }
+
+        if (!request.getReturnStartTime().isAfter(request.getStartTime())) {
+            throw new AppException(PlanErrorCode.INVALID_RETURN_TIME);
+        }
+
         Car car = carRepository.findById(request.getCarId())
                 .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_CAR_NOT_FOUND));
 
@@ -78,7 +86,8 @@ public class PlanServiceImpl implements PlanService {
                 driver,
                 branch,
                 route,
-                request.getCode() + "_OUT"
+                request.getCode() + "_OUT",
+                request.getStartTime()
         );
 
         // ===== TẠO PLAN B (CHIỀU VỀ) =====
@@ -88,7 +97,8 @@ public class PlanServiceImpl implements PlanService {
                 driver,
                 branch,
                 route.getRouteRevert(),
-                request.getCode() + "_BACK"
+                request.getCode() + "_BACK",
+                request.getReturnStartTime()
         );
 
         // ===== SAVE =====
@@ -106,7 +116,8 @@ public class PlanServiceImpl implements PlanService {
                            Account driver,
                            Branch branch,
                            Route route,
-                           String code) {
+                           String code,
+                           LocalDateTime startTime) {
 
         Plan plan = Plan.builder()
                 .code(code)
@@ -114,7 +125,7 @@ public class PlanServiceImpl implements PlanService {
                 .account(driver)
                 .branch(branch)
                 .route(route)
-                .startTime(request.getStartTime())
+                .startTime(startTime)
                 .status(request.getStatus().trim())
                 .build();
 
