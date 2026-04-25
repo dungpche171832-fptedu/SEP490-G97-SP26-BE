@@ -359,12 +359,15 @@ public class TicketServiceImpl implements TicketService {
                 .distanceKm(ticket.getDistanceKm())
                 .totalAmount(ticket.getTotalAmount())
 
+                .startStation(ticket.getStartStation().getName())
+                .endStation(ticket.getEndStation().getName())
+
                 .status(ticket.getStatus().name())
                 .note(ticket.getNote())
 
                 .startTime(ticket.getPlan().getStartTime())
 
-                .seatNumbers(seatNumbers) // ⭐ list ghế
+                .seatNumbers(seatNumbers)
                 .build();
     }
 }

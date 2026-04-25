@@ -1,8 +1,9 @@
 package vn.edu.fpt.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import vn.edu.fpt.entity.Route;
 
-public interface RouteRepository extends JpaRepository<Route, Long> {
+public interface RouteRepository extends JpaRepository<Route, Long>, JpaSpecificationExecutor<Route> {
     boolean existsByCode(String code);
 }

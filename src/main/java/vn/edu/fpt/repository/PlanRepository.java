@@ -21,4 +21,6 @@ public interface PlanRepository extends JpaRepository<Plan, Long>, JpaSpecificat
     boolean existsByAccountAndStartTimeBetween(Account account, LocalDateTime startOfDay, LocalDateTime endOfDay);
 
     boolean existsByAccountAccountIdAndStartTime(Long accountId, LocalDateTime startTime);
+
+    boolean existsByRouteId(Long routeId);
 }

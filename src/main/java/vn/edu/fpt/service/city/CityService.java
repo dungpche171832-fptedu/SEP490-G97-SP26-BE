@@ -1,6 +1,6 @@
 package vn.edu.fpt.service.city;
 
-import vn.edu.fpt.dto.response.CityResponse;
+import vn.edu.fpt.dto.response.city.CityResponse;
 
 import java.util.List;
 

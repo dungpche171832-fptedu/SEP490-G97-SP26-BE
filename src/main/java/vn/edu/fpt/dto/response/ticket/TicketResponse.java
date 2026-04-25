@@ -31,6 +31,9 @@ public class TicketResponse {
     private Double distanceKm;
     private BigDecimal totalAmount;
 
+    private String startStation;
+    private String endStation;
+
     private String status;
     private String note;
 

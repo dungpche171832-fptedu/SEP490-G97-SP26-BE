@@ -2,7 +2,7 @@ package vn.edu.fpt.service.city;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.edu.fpt.dto.response.CityResponse;
+import vn.edu.fpt.dto.response.city.CityResponse;
 import vn.edu.fpt.entity.City;
 import vn.edu.fpt.repository.CityRepository;
 import vn.edu.fpt.service.city.CityService;
