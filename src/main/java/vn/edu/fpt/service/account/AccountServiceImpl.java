@@ -36,6 +36,10 @@ public class AccountServiceImpl implements AccountService {
 
         Specification<Account> spec = (root, query, cb) -> cb.conjunction();
 
+        spec = spec.and((root, query, cb) ->
+                cb.equal(cb.upper(root.get("status")), "ACTIVE")
+        );
+
         // role
         if (roles != null && !roles.isEmpty()) {
             List<String> normalizedRoles = roles.stream()

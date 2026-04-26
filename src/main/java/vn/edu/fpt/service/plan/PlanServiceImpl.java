@@ -17,6 +17,7 @@ import vn.edu.fpt.repository.*;
 import vn.edu.fpt.service.email.EmailService;
 import vn.edu.fpt.service.email.MailChangeSender;
 import vn.edu.fpt.ultis.enums.PlanSeatStatus;
+import vn.edu.fpt.ultis.enums.PlanStatus;
 import vn.edu.fpt.ultis.errorCode.*;
 
 
@@ -126,7 +127,7 @@ public class PlanServiceImpl implements PlanService {
                 .branch(branch)
                 .route(route)
                 .startTime(startTime)
-                .status(request.getStatus().trim())
+                .status(PlanStatus.valueOf(request.getStatus().trim()))
                 .build();
 
         // ===== TẠO PLAN SEAT =====
@@ -178,7 +179,7 @@ public class PlanServiceImpl implements PlanService {
 
                 .startTime(plan.getStartTime())
 
-                .status(plan.getStatus())
+                .status(String.valueOf(plan.getStatus()))
                 .stations(stations)
                 .build();
     }
@@ -340,7 +341,7 @@ public class PlanServiceImpl implements PlanService {
                 .routeName(plan.getRoute().getName())
 
                 .startTime(plan.getStartTime())
-                .status(plan.getStatus())
+                .status(String.valueOf(plan.getStatus()))
 
                 .stations(stations)
                 .build();
@@ -385,7 +386,7 @@ public class PlanServiceImpl implements PlanService {
                 .routeName(route.getName())
 
                 .startTime(plan.getStartTime())
-                .status(plan.getStatus())
+                .status(String.valueOf(plan.getStatus()))
 
                 .stations(stationResponses)
                 .build();
@@ -399,7 +400,7 @@ public class PlanServiceImpl implements PlanService {
 
         String normalizedStatus = request.getStatus().trim().toUpperCase();
 
-        plan.setStatus(normalizedStatus);
+        plan.setStatus(PlanStatus.valueOf(normalizedStatus));
 
         Plan updatedPlan = planRepository.save(plan);
 
@@ -461,7 +462,7 @@ public class PlanServiceImpl implements PlanService {
         }
 
         // 6. Check plan status
-        if ("RUNNING".equals(plan.getStatus()) || "DONE".equals(plan.getStatus())) {
+        if ("RUNNING".equals(plan.getStatus()) || "COMPLETE".equals(plan.getStatus())) {
             throw new AppException(PlanErrorCode.CANNOT_CHANGE_DRIVER);
         }
 
@@ -509,6 +510,20 @@ public class PlanServiceImpl implements PlanService {
         // 3. Validate cùng car type
         if (!oldCar.getCarType().equals(newCar.getCarType())) {
             throw new AppException(CarErrorCode.CAR_TYPE_NOT_MATCH);
+        }
+
+        LocalDateTime startOfDay = plan.getStartTime().toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = plan.getStartTime().toLocalDate().atTime(LocalTime.MAX);
+
+        boolean isUsed = planRepository.existsByCarAndDate(
+                newCar.getId(),
+                plan.getId(),
+                startOfDay,
+                endOfDay
+        );
+
+        if (isUsed) {
+            throw new AppException(PlanErrorCode.PLAN_ALREADY_EXISTS);
         }
 
         // 4. Update plan

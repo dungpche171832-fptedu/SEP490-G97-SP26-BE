@@ -13,6 +13,7 @@ import vn.edu.fpt.entity.Car;
 import vn.edu.fpt.exception.AppException;
 import vn.edu.fpt.repository.BranchRepository;
 import vn.edu.fpt.repository.CarRepository;
+import vn.edu.fpt.ultis.enums.CarStatus;
 import vn.edu.fpt.ultis.errorCode.BranchErrorCode;
 import vn.edu.fpt.ultis.errorCode.CarErrorCode;
 
@@ -31,6 +32,11 @@ public class CarServiceImpl implements CarService {
     public List<Car> getAllCars(Long branchId, String licensePlate) {
 
         Specification<Car> spec = (root, query, cb) -> cb.conjunction();
+
+        // luôn lấy xe đang hoạt động
+        spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("status"), CarStatus.RUNNING)
+        );
 
         if (branchId != null) {
             spec = spec.and((root, query, cb) ->

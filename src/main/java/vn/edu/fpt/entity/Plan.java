@@ -2,6 +2,8 @@ package vn.edu.fpt.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import vn.edu.fpt.ultis.enums.PlanSeatStatus;
+import vn.edu.fpt.ultis.enums.PlanStatus;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -52,8 +54,9 @@ public class Plan extends BaseEntity {
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private String status;
+    private PlanStatus status;
 
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

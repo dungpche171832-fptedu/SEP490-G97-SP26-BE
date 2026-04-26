@@ -23,4 +23,18 @@ public interface PlanRepository extends JpaRepository<Plan, Long>, JpaSpecificat
     boolean existsByAccountAccountIdAndStartTime(Long accountId, LocalDateTime startTime);
 
     boolean existsByRouteId(Long routeId);
+
+    @Query("""
+    SELECT COUNT(p) > 0
+    FROM Plan p
+    WHERE p.car.id = :carId
+    AND p.id <> :planId
+    AND p.startTime BETWEEN :startOfDay AND :endOfDay
+""")
+    boolean existsByCarAndDate(
+            Long carId,
+            Long planId,
+            LocalDateTime startOfDay,
+            LocalDateTime endOfDay
+    );
 }
