@@ -3,14 +3,10 @@ package vn.edu.fpt.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
-@Table(
-        name = "news",
-        indexes = {
-                @Index(name = "idx_news_title", columnList = "title"),
-                @Index(name = "idx_news_status", columnList = "status")
-        }
-)
+@Table(name = "news")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,28 +15,23 @@ import lombok.*;
 public class News extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name = "title", nullable = false, length = 255)
+    @Column(nullable = false)
     private String title;
 
-    @Column(name = "slug", unique = true, length = 255)
-    private String slug;
-
-    @Column(name = "content", columnDefinition = "TEXT", nullable = false)
+    @Column(length = 2000)
     private String content;
 
-    @Column(name = "thumbnail", length = 500)
-    private String thumbnail;
+    private String imageUrl;
 
-    @Column(name = "summary", length = 500)
-    private String summary;
+    private Boolean isActive;
 
-    @Column(name = "status", nullable = false)
-    private String status;
-    // DRAFT / PUBLISHED / HIDDEN
+    private Integer displayOrder;
 
-    @Column(name = "is_featured", nullable = false)
-    private Boolean isFeatured = false;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
+    private Boolean isDeleted;
 }
