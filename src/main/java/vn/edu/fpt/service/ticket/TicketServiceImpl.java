@@ -271,7 +271,7 @@ public class TicketServiceImpl implements TicketService {
         for (PlanSeat ps : seats) {
             ps.setTicket(ticket);
             ps.setStatus(PlanSeatStatus.HOLD);
-            ps.setHoldExpiredAt(LocalDateTime.now().plusMinutes(15));
+            ps.setHoldExpiredAt(LocalDateTime.now().plusMinutes(10));
         }
         planSeatRepository.saveAll(seats);
     }
