@@ -16,13 +16,24 @@ import java.util.List;
 public class PlanDetailResponse {
     private Long id;
     private String code;
+
     private Long carId;
     private String carLicensePlate;
+
     private Long accountId;
     private String driverName;
+    private String driverPhone;
+
+    private Long branchId;
+    private String branchName;
+
+    private Long routeId;
+    private String routeName;
+
     private LocalDateTime startTime;
-    private LocalDateTime endTime;
+
     private String status;
+
     private List<RouteStationResponse> stations;
     private List<PlanSeatResponse> seats;
 }

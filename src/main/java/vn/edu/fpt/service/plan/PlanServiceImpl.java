@@ -348,7 +348,7 @@ public class PlanServiceImpl implements PlanService {
     }
 
     @Override
-    public PlanResponse getPlanDetail(Long planId) {
+    public PlanDetailResponse getPlanDetail(Long planId) {
 
         Plan plan = planRepository.findById(planId)
                 .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
@@ -368,7 +368,16 @@ public class PlanServiceImpl implements PlanService {
                         .build())
                 .toList();
 
-        return PlanResponse.builder()
+        // ===== SEATS =====
+        List<PlanSeatResponse> seatResponses = plan.getPlanSeats().stream()
+                .map(ps -> PlanSeatResponse.builder()
+                        .seatId(ps.getSeat().getId())
+                        .seatNumber(ps.getSeat().getSeatNumber())
+                        .status(ps.getStatus().name())
+                        .build())
+                .toList();
+
+        return PlanDetailResponse.builder()
                 .id(plan.getId())
                 .code(plan.getCode())
 
@@ -389,6 +398,7 @@ public class PlanServiceImpl implements PlanService {
                 .status(String.valueOf(plan.getStatus()))
 
                 .stations(stationResponses)
+                .seats(seatResponses)
                 .build();
     }
 

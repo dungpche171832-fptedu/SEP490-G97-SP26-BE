@@ -24,7 +24,7 @@ public interface PlanService {
             Long branchId
     );
 
-    PlanResponse getPlanDetail(Long planId);
+    PlanDetailResponse getPlanDetail(Long planId);
 
     PlanResponse updatePlanStatus(Long planId, UpdatePlanStatusRequest request);
 

@@ -47,7 +47,7 @@ public class PlanController {
         );
     }
     @GetMapping("/{planId}")
-    public ResponseEntity<PlanResponse> getPlanDetail(@PathVariable Long planId) {
+    public ResponseEntity<PlanDetailResponse> getPlanDetail(@PathVariable Long planId) {
         return ResponseEntity.ok(planService.getPlanDetail(planId));
     }
 
