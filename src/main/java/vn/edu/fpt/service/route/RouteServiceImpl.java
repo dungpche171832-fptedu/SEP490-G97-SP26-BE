@@ -80,7 +80,7 @@ public class RouteServiceImpl implements RouteService {
         // ===== CREATE ROUTE X' =====
         Route reverseRoute = Route.builder()
                 .code(request.getCode() + "_R")
-                .name(request.getName() + " (Reverse)")
+                .name(request.getNameRevert())
                 .isActive(true)
                 .build();
 

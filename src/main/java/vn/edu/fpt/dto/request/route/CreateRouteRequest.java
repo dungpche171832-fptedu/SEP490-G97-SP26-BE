@@ -7,5 +7,6 @@ import java.util.List;
 public class CreateRouteRequest {
     private String code;
     private String name;
+    private String nameRevert;
     private List<vn.edu.fpt.dto.request.station.StationOrderRequest> stations;
 }
