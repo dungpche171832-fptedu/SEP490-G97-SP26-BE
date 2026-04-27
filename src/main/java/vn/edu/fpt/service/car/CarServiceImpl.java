@@ -122,7 +122,7 @@ public class CarServiceImpl implements CarService {
                 .orElseThrow(() -> new AppException(CarErrorCode.CAR_NOT_FOUND));
 
         // Kiểm tra trạng thái xe, nếu không hoạt động, ném ra lỗi CAR_NOT_ACTIVE.
-        if (!Boolean.TRUE.equals(car.getIsActive())) {
+        if (car.getStatus() != CarStatus.RUNNING) {
             throw new AppException(CarErrorCode.CAR_NOT_ACTIVE);
         }
 
