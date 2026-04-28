@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import vn.edu.fpt.dto.projection.PlanStatProjection;
 import vn.edu.fpt.entity.Account;
 import vn.edu.fpt.entity.Car;
 import vn.edu.fpt.entity.Plan;
@@ -36,5 +37,25 @@ public interface PlanRepository extends JpaRepository<Plan, Long>, JpaSpecificat
             Long planId,
             LocalDateTime startOfDay,
             LocalDateTime endOfDay
+    );
+
+    @Query("""
+    SELECT COUNT(p)
+    FROM Plan p
+    WHERE p.startTime BETWEEN :start AND :end
+""")
+    Long countPlans(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    @Query("""
+    SELECT COUNT(p) AS totalPlans
+    FROM Plan p
+    WHERE p.startTime BETWEEN :start AND :end
+""")
+    PlanStatProjection getPlanStats(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
     );
 }
