@@ -21,6 +21,7 @@ public class TicketResponse {
 
     private Long carId;
     private String carLicensePlate;
+    private String carType;
 
     private Long branchId;
     private String branchName;

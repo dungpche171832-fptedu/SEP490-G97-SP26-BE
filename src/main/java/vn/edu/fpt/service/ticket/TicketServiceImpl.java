@@ -349,6 +349,7 @@ public class TicketServiceImpl implements TicketService {
 
                 .carId(ticket.getCar().getId())
                 .carLicensePlate(ticket.getCar().getLicensePlate())
+                .carType(String.valueOf(ticket.getCar().getCarType()))
 
                 .branchId(ticket.getBranch().getId())
                 .branchName(ticket.getBranch().getName())
