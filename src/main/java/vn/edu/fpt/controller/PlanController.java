@@ -83,4 +83,19 @@ public class PlanController {
         planService.changeCar(planId, request.getNewCarId());
         return ResponseEntity.ok("Change car successfully");
     }
+
+    @GetMapping("/plans/change-plans")
+    public ResponseEntity<PlanListResponse> getPlansToChange(
+            @RequestParam(required = false) Integer totalSeat,
+            @RequestParam(required = false) Long departureStationId,
+            @RequestParam(required = false) Long destinationStationId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startTime,
+            @RequestParam(required = false) Long branchId,
+            @RequestParam(required = false) String carType
+    ) {
+        return ResponseEntity.ok(
+                planService.getPlansToChange(totalSeat, departureStationId, destinationStationId, status, startTime, branchId, carType)
+        );
+    }
 }

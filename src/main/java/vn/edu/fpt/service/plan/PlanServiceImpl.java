@@ -571,4 +571,137 @@ public class PlanServiceImpl implements PlanService {
             );
         }
     }
+    @Override
+    @Transactional(readOnly = true)
+    public PlanListResponse getPlansToChange(Integer totalSeat,Long departureStationId,Long destinationStationId,String status,Date startTime,Long branchId,String carType) {
+
+        Specification<Plan> spec = (root, query, cb) -> {
+            query.distinct(true);
+            return cb.conjunction();
+        };
+
+        // ===== FILTER TOTAL AVAILABLE SEAT =====
+        if (totalSeat != null && totalSeat > 0) {
+            spec = spec.and((root, query, cb) -> {
+
+                var subquery = query.subquery(Long.class);
+                var ps = subquery.from(PlanSeat.class);
+
+                subquery.select(cb.count(ps));
+
+                subquery.where(
+                        cb.equal(ps.get("plan").get("id"), root.get("id")),
+                        cb.equal(ps.get("status"), PlanSeatStatus.AVAILABLE)
+                );
+
+                return cb.greaterThanOrEqualTo(subquery, totalSeat.longValue());
+            });
+        }
+
+        // ===== FILTER DEPARTURE + DESTINATION =====
+        if (departureStationId != null && destinationStationId != null) {
+            spec = spec.and((root, query, cb) -> {
+
+                var route = root.join("route");
+
+                var rsDeparture = route.join("routeStations");
+                var rsDestination = route.join("routeStations");
+
+                return cb.and(
+                        // A là điểm đầu
+                        cb.equal(rsDeparture.get("station").get("id"), departureStationId),
+                        cb.equal(rsDeparture.get("stationOrder"), 1),
+
+                        // B là điểm phía sau
+                        cb.equal(rsDestination.get("station").get("id"), destinationStationId),
+                        cb.greaterThan(rsDestination.get("stationOrder"), 1)
+                );
+            });
+        }
+
+        // ===== CHỈ DEPARTURE =====
+        if (departureStationId != null && destinationStationId == null) {
+            spec = spec.and((root, query, cb) -> {
+                var route = root.join("route");
+                var rs = route.join("routeStations");
+
+                return cb.and(
+                        cb.equal(rs.get("station").get("id"), departureStationId),
+                        cb.equal(rs.get("stationOrder"), 1)
+                );
+            });
+        }
+
+        // ===== CHỈ DESTINATION =====
+        if (destinationStationId != null && departureStationId == null) {
+            spec = spec.and((root, query, cb) -> {
+                var route = root.join("route");
+                var rs = route.join("routeStations");
+
+                return cb.and(
+                        cb.equal(rs.get("station").get("id"), destinationStationId),
+                        cb.greaterThan(rs.get("stationOrder"), 1)
+                );
+            });
+        }
+
+        // ===== FILTER STATUS =====
+        if (status != null && !status.isBlank()) {
+            String normalizedStatus = status.trim().toUpperCase();
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(cb.upper(root.get("status")), normalizedStatus)
+            );
+        }
+
+        // ===== FILTER DATE =====
+        if (startTime != null) {
+            LocalDateTime startOfDay = startTime.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                    .atStartOfDay();
+
+            LocalDateTime endOfDay = startTime.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+                    .atTime(LocalTime.MAX);
+
+            spec = spec.and((root, query, cb) ->
+                    cb.between(root.get("startTime"), startOfDay, endOfDay)
+            );
+        }
+
+        // ===== FILTER BRANCH =====
+        if (branchId != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("branch").get("id"), branchId)
+            );
+        }
+
+        // ===== FILTER CAR TYPE (JOIN CAR) =====
+        if (carType != null && !carType.isBlank()) {
+            spec = spec.and((root, query, cb) -> {
+                var carJoin = root.join("car");
+                return cb.equal(
+                        cb.upper(carJoin.get("carType")),
+                        carType.trim().toUpperCase()
+                );
+            });
+        }
+
+        List<Plan> plans = planRepository.findAll(spec);
+
+        if (plans.isEmpty()) {
+            throw new AppException(PlanErrorCode.PLAN_NOT_FOUND);
+        }
+
+        List<PlanListItemResponse> items = plans.stream()
+                .map(this::mapToPlanListItemResponse)
+                .toList();
+
+        return PlanListResponse.builder()
+                .plans(items)
+                .totalCount(items.size())
+                .message("Danh sách plan")
+                .build();
+    }
 }

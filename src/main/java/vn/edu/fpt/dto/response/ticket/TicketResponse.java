@@ -31,7 +31,10 @@ public class TicketResponse {
     private Double distanceKm;
     private BigDecimal totalAmount;
 
+    private Long startStationId;
     private String startStation;
+
+    private Long endStationId;
     private String endStation;
 
     private String status;
@@ -40,4 +43,5 @@ public class TicketResponse {
     private LocalDateTime startTime;
 
     private List<String> seatNumbers;
+    private Integer totalSeats;
 }

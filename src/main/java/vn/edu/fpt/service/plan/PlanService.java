@@ -33,4 +33,6 @@ public interface PlanService {
     void changeDriver(Long planId, Long newDriverId);
 
     void changeCar(Long planId, Long newCarId);
+
+    PlanListResponse getPlansToChange(Integer totalSeat,Long departureStationId,Long destinationStationId,String status,Date startTime,Long branchId,String carType);
 }

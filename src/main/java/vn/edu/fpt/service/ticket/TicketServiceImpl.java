@@ -359,7 +359,10 @@ public class TicketServiceImpl implements TicketService {
                 .distanceKm(ticket.getDistanceKm())
                 .totalAmount(ticket.getTotalAmount())
 
+                .startStationId(ticket.getStartStation().getId())
                 .startStation(ticket.getStartStation().getName())
+
+                .endStationId(ticket.getEndStation().getId())
                 .endStation(ticket.getEndStation().getName())
 
                 .status(ticket.getStatus().name())
@@ -368,6 +371,7 @@ public class TicketServiceImpl implements TicketService {
                 .startTime(ticket.getPlan().getStartTime())
 
                 .seatNumbers(seatNumbers)
+                .totalSeats(seatNumbers.size())
                 .build();
     }
 }
