@@ -20,6 +20,8 @@ public enum NewsErrorCode implements BaseErrorCode {
 
     INVALID_DISPLAY_ORDER(OK, "NEWS-005", "Thứ tự hiển thị không hợp lệ", new HashMap<>()),
 
+    NEWS_NOT_AVAILABLE(OK, "NEWS-002", "Tin tức hiện không khả dụng", new HashMap<>()
+    );
     ;
 
     private final HttpStatusCode statusCode;

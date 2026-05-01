@@ -82,6 +82,27 @@ public class NewsServiceImpl implements NewsService {
                 .toList();
     }
 
+    @Override
+    public NewsResponse getNewsDetail(Long newsId) {
+
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() ->
+                        new AppException(NewsErrorCode.NEWS_NOT_FOUND));
+
+        LocalDateTime now = LocalDateTime.now();
+
+        boolean isDisplayable =
+                Boolean.TRUE.equals(news.getIsActive())
+                        && !now.isBefore(news.getStartTime())
+                        && !now.isAfter(news.getEndTime());
+
+        if (!isDisplayable) {
+            throw new AppException(NewsErrorCode.NEWS_NOT_AVAILABLE);
+        }
+
+        return map(news);
+    }
+
     // ===== VALIDATE =====
     private void validate(NewsRequest request) {
 

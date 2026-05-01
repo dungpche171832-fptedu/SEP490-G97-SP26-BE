@@ -6,6 +6,7 @@ import vn.edu.fpt.entity.News;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface NewsRepository extends JpaRepository<News, Long> {
 
@@ -20,4 +21,6 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     List<News> findActiveNews(LocalDateTime now);
 
     List<News> findByIsDeletedFalse();
+
+    Optional<News> findByIdAndIsActiveTrue(Long id);
 }

@@ -16,4 +16,6 @@ public interface NewsService {
     List<NewsResponse> getAll(); // admin
 
     List<NewsResponse> getActive(); // user
+
+    NewsResponse getNewsDetail(Long newsId);
 }

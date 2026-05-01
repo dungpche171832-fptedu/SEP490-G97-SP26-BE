@@ -44,4 +44,11 @@ public class NewsController {
     public List<NewsResponse> getActive() {
         return newsService.getActive();
     }
+
+    @GetMapping("/{id}")
+    public NewsResponse getNewsDetail(
+            @PathVariable Long id
+    ) {
+        return newsService.getNewsDetail(id);
+    }
 }
