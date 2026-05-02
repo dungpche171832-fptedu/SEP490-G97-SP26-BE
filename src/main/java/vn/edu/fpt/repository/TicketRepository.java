@@ -1,5 +1,6 @@
 package vn.edu.fpt.repository;
 
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,7 +28,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
     );
 
     @Query("""
-    SELECT 
+    SELECT
         p.route.id AS routeId,
         p.route.name AS routeName,
         COUNT(t) AS totalTickets
@@ -40,7 +41,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
 """)
     List<TopRouteProjection> getTopRoutes(
             @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end
+            @Param("end") LocalDateTime end,
+            Pageable pageable
     );
 
 }

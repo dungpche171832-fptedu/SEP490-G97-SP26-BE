@@ -1,7 +1,11 @@
 package vn.edu.fpt.service.dashboard;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import vn.edu.fpt.dto.projection.*;
 import vn.edu.fpt.dto.response.DashboardResponse;
 import vn.edu.fpt.repository.PlanRepository;
@@ -30,7 +34,11 @@ public class DashboardServiceImpl implements DashboardService {
 
         // ===== TOP ROUTES =====
         List<TopRouteProjection> routes =
-                ticketRepository.getTopRoutes(start, end);
+                ticketRepository.getTopRoutes(
+                        start,
+                        end,
+                        PageRequest.of(0, 4)
+                );
 
         List<DashboardResponse.TopRouteItem> topRoutes =
                 routes.stream()
