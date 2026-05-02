@@ -6,16 +6,19 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.dto.request.account.CreateAccountRequest;
+import vn.edu.fpt.dto.request.account.UpdateAccountStatusRequest;
 import vn.edu.fpt.dto.request.account.UpdateProfileRequest;
 import vn.edu.fpt.dto.request.account.ChangePasswordRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import vn.edu.fpt.dto.response.account.AccountResponse;
 import vn.edu.fpt.dto.response.account.CreateAccountResponse;
+import vn.edu.fpt.dto.response.account.UpdateAccountStatusResponse;
 import vn.edu.fpt.entity.Account;
 import vn.edu.fpt.entity.Role;
 import vn.edu.fpt.exception.AppException;
 import vn.edu.fpt.repository.AccountRepository;
 import vn.edu.fpt.repository.RoleRepository;
+import vn.edu.fpt.ultis.enums.AccountStatus;
 import vn.edu.fpt.ultis.errorCode.AccountErrorCode;
 
 
@@ -269,6 +272,61 @@ public class AccountServiceImpl implements AccountService {
                 .email(account.getEmail())
                 .role(role.getName())
                 .branchId(account.getBranchId())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public UpdateAccountStatusResponse updateAccountStatus(
+            Long accountId,
+            UpdateAccountStatusRequest request
+    ) {
+
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        Account currentAccount = accountRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new AppException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        Account targetAccount = accountRepository.findById(accountId)
+                .orElseThrow(() ->
+                        new AppException(AccountErrorCode.ACCOUNT_NOT_FOUND));
+
+        // Không được sửa chính mình
+        if (currentAccount.getAccountId().equals(accountId)) {
+            throw new AppException(
+                    AccountErrorCode.CANNOT_UPDATE_YOURSELF
+            );
+        }
+
+        // Không được sửa admin khác
+        String targetRole =
+                targetAccount.getRole().getName().toUpperCase();
+
+        if ("ADMIN".equals(targetRole)) {
+            throw new AppException(
+                    AccountErrorCode.CANNOT_UPDATE_ADMIN
+            );
+        }
+
+        AccountStatus oldStatus = targetAccount.getStatus();
+
+        targetAccount.setStatus(request.getStatus());
+
+        targetAccount.setTokenVersion(
+                targetAccount.getTokenVersion() + 1
+        );
+
+        Account saved = accountRepository.save(targetAccount);
+
+        return UpdateAccountStatusResponse.builder()
+                .accountId(saved.getAccountId())
+                .fullName(saved.getFullName())
+                .email(saved.getEmail())
+                .oldStatus(oldStatus)
+                .newStatus(saved.getStatus())
                 .build();
     }
 }

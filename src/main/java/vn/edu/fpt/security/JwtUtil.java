@@ -31,6 +31,7 @@ public class JwtUtil {
                 .claim("branchId", account.getBranchId() == null ? "null" : account.getBranchId())
                 .claim("accountId", account.getAccountId())
                 .claim("role", account.getRole().getName())
+                .claim("tokenVersion", account.getTokenVersion())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(getSigningKey())

@@ -19,9 +19,10 @@ public enum AccountErrorCode implements BaseErrorCode {
     INVALID_PASSWORD(OK, "ACC-008", "Mật khẩu không hợp lệ, phải có ít nhất 8 ký tự và 1 chữ cái hoa", new HashMap<>()),
     INVALID_ROLE(OK, "ACC-009", "Vai trò không hợp lệ", new HashMap<>()),
     FORBIDDEN_ACTION(OK, "ACC-010", "Bạn không có quyền thao tác chức năng này", new HashMap<>()),
-//    INVALID_NEW_PASSWORD(OK, "ACC-011", "Mật khẩu mới không hợp lệ", new HashMap<>()),
     ROLE_NOT_FOUND(OK, "ACC-011", "Role không hợp lệ", new HashMap<>()),
     NEW_PASSWORD_MUST_BE_DIFFERENT(OK, "ACC-012", "Mật khẩu mới trùng với mật khẩu hiện tại", new HashMap<>()),
+    CANNOT_UPDATE_YOURSELF(OK,"ACC-013","Không thể tự thay đổi trạng thái của chính mình",new HashMap<>()),
+    CANNOT_UPDATE_ADMIN(OK, "ACC-014", "Không thể thay đổi trạng thái của tài khoản admin khác", new HashMap<>()),
     ;
     private final HttpStatusCode statusCode;
     private final String code; // Đảm bảo `code` là String

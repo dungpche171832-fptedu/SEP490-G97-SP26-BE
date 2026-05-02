@@ -6,10 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.dto.request.account.ChangePasswordRequest;
 import vn.edu.fpt.dto.request.account.CreateAccountRequest;
+import vn.edu.fpt.dto.request.account.UpdateAccountStatusRequest;
 import vn.edu.fpt.dto.request.account.UpdateProfileRequest;
 import vn.edu.fpt.dto.response.account.AccountListResponse;
 import vn.edu.fpt.dto.response.account.AccountResponse;
 import vn.edu.fpt.dto.response.account.CreateAccountResponse;
+import vn.edu.fpt.dto.response.account.UpdateAccountStatusResponse;
 import vn.edu.fpt.entity.Account;
 import vn.edu.fpt.security.AccountDetailsServiceImpl;
 import vn.edu.fpt.service.account.AccountService;
@@ -63,5 +65,13 @@ public class AccountController {
             @RequestBody CreateAccountRequest request
     ) {
         return ResponseEntity.ok(accountService.createAccount(request));
+    }
+
+    @PutMapping("/{accountId}/status")
+    public ResponseEntity<UpdateAccountStatusResponse> updateAccountStatus(
+            @PathVariable Long accountId,
+            @RequestBody UpdateAccountStatusRequest request
+    ) {
+        return ResponseEntity.ok(accountService.updateAccountStatus(accountId, request));
     }
 }

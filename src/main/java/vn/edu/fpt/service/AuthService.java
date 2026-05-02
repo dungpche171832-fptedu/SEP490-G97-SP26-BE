@@ -59,7 +59,7 @@ public class AuthService {
                 Account account = accountRepository.findByEmail(request.getEmail())
                         .orElseThrow(() -> new AppException(AccountErrorCode.ACCOUNT_NOT_FOUND));
 
-                if (!Boolean.TRUE.equals(account.getIsActive())) {
+                if (account.getStatus() == AccountStatus.INACTIVE) {
                         throw new AppException(AccountErrorCode.ACCOUNT_NOT_ACTIVE);
                 }
 
