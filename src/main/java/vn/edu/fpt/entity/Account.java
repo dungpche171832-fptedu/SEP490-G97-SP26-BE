@@ -44,6 +44,7 @@ public class Account extends BaseEntity {
     private Long branchId;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private AccountStatus status = AccountStatus.ACTIVE;
 
     @Column(name = "token_version")

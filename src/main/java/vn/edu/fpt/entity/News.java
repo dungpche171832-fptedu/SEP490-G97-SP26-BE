@@ -24,6 +24,7 @@ public class News extends BaseEntity {
     @Column(length = 2000)
     private String content;
 
+    @Column(name = "image_url", columnDefinition = "LONGTEXT")
     private String imageUrl;
 
     private Boolean isActive;
