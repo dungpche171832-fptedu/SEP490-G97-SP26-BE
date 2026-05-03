@@ -59,7 +59,7 @@ public class SecurityConfig {
                                 "/api/cities",
                                 "/api/rules/price",
                                 "/api/stations",
-                                "/api/news"
+                                "/api/news/**"
                         ).permitAll()
 
                         .requestMatchers(
