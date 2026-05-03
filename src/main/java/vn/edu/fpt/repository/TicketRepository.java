@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import vn.edu.fpt.dto.projection.TicketStatProjection;
@@ -44,5 +45,14 @@ public interface TicketRepository extends JpaRepository<Ticket, Long>, JpaSpecif
             @Param("end") LocalDateTime end,
             Pageable pageable
     );
+
+    @Modifying
+    @Query("""
+    UPDATE Ticket t
+    SET t.status = 'COMPLETED'
+    WHERE t.plan.id = :planId
+    AND t.status = 'BOOKED'
+""")
+    void completeBookedTicketsByPlanId(@Param("planId") Long planId);
 
 }

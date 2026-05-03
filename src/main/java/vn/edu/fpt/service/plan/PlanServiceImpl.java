@@ -404,13 +404,34 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     @Transactional
-    public PlanResponse updatePlanStatus(Long planId, UpdatePlanStatusRequest request) {
+    public PlanResponse updatePlanStatus(
+            Long planId,
+            UpdatePlanStatusRequest request
+    ) {
+
         Plan plan = planRepository.findById(planId)
-                .orElseThrow(() -> new AppException(PlanErrorCode.PLAN_NOT_FOUND));
+                .orElseThrow(() ->
+                        new AppException(PlanErrorCode.PLAN_NOT_FOUND));
 
-        String normalizedStatus = request.getStatus().trim().toUpperCase();
+        PlanStatus newStatus;
 
-        plan.setStatus(PlanStatus.valueOf(normalizedStatus));
+        try {
+            newStatus = PlanStatus.valueOf(
+                    request.getStatus().trim().toUpperCase()
+            );
+        } catch (Exception e) {
+            throw new AppException(PlanErrorCode.PLAN_STATUS_INVALID);
+        }
+
+        plan.setStatus(newStatus);
+
+        // PLAN COMPLETED
+        if (newStatus == PlanStatus.COMPLETE) {
+
+            ticketRepository.completeBookedTicketsByPlanId(
+                    plan.getId()
+            );
+        }
 
         Plan updatedPlan = planRepository.save(plan);
 

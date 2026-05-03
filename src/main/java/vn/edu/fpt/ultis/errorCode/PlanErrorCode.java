@@ -29,7 +29,8 @@ public enum PlanErrorCode implements BaseErrorCode {
     START_DATE_NOT_MATCH(OK, "PLAN-017", "Ngày xuất phát không hợp lệ", new HashMap<>()),
     SEAT_COUNT_NOT_MATCH(OK, "PLAN-018", "Số lượng ghế không hợp lệ", new HashMap<>()),
     RETURN_TIME_REQUIRED(OK, "PLAN-019", "Thời gian đi là trường bắt buộc", new HashMap<>()),
-    INVALID_RETURN_TIME(OK, "PLAN-020", "Thời gian đi không hợp lệ", new HashMap<>())
+    INVALID_RETURN_TIME(OK, "PLAN-020", "Thời gian đi không hợp lệ", new HashMap<>()),
+    PLAN_STATUS_INVALID(OK, "PLAN-021", "Trạng thái không hợp lệ", new HashMap<>()),
     ;
 
     private final HttpStatusCode statusCode;
