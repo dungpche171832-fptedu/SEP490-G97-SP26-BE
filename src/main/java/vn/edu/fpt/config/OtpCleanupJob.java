@@ -1,5 +1,6 @@
 package vn.edu.fpt.config;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,6 +16,7 @@ public class OtpCleanupJob {
 
     // chạy mỗi ngày lúc 2h sáng
     @Scheduled(cron = "0 0 2 * * ?")
+    @Transactional
     public void deleteExpiredOtp() {
         int deleted = otpRepository.deleteExpiredOtp();
         log.info("Deleted {} expired OTP records", deleted);
