@@ -47,6 +47,10 @@ public class RouteServiceImpl implements RouteService {
             throw new AppException(RouteErrorCode.STATION_LIST_EMPTY);
         }
 
+        if (request.getReverseStations() == null || request.getReverseStations().isEmpty()) {
+            throw new AppException(RouteErrorCode.STATION_LIST_EMPTY);
+        }
+
         if (routeRepository.existsByCode(request.getCode())) {
             throw new AppException(RouteErrorCode.ROUTE_CODE_EXISTS);
         }
@@ -88,11 +92,8 @@ public class RouteServiceImpl implements RouteService {
 
         List<RouteStation> reverseStations = new ArrayList<>();
 
-        List<StationOrderRequest> reversedList = new ArrayList<>(request.getStations());
-        Collections.reverse(reversedList);
+        for (StationOrderRequest s : request.getReverseStations()) {
 
-        int order = 1;
-        for (StationOrderRequest s : reversedList) {
             Station station = stationRepository.findById(s.getStationId())
                     .orElseThrow(() -> new AppException(RouteErrorCode.STATION_NOT_FOUND));
 
@@ -100,7 +101,7 @@ public class RouteServiceImpl implements RouteService {
                     RouteStation.builder()
                             .route(reverseRoute)
                             .station(station)
-                            .stationOrder(order++)
+                            .stationOrder(s.getOrder())
                             .build()
             );
         }
@@ -217,6 +218,10 @@ public class RouteServiceImpl implements RouteService {
             throw new AppException(RouteErrorCode.STATION_LIST_EMPTY);
         }
 
+        if (request.getReverseStations() == null || request.getReverseStations().isEmpty()) {
+            throw new AppException(RouteErrorCode.STATION_LIST_EMPTY);
+        }
+
         // ===== UPDATE ROUTE CHÍNH =====
         route.setCode(request.getCode());
         route.setName(request.getName());
@@ -224,7 +229,7 @@ public class RouteServiceImpl implements RouteService {
         // ===== UPDATE ROUTE REVERSE =====
         if (reverseRoute != null) {
             reverseRoute.setCode(request.getCode() + "_R");
-            reverseRoute.setName(request.getName() + " (Reverse)");
+            reverseRoute.setName(request.getNameRevert());
         }
 
         // ===== DELETE STATIONS CŨ =====
@@ -241,7 +246,6 @@ public class RouteServiceImpl implements RouteService {
 
             Station station = stationRepository.findById(s.getStationId())
                     .orElseThrow(() -> new AppException(RouteErrorCode.STATION_NOT_FOUND));
-
             newStations.add(
                     RouteStation.builder()
                             .route(route)
@@ -256,13 +260,9 @@ public class RouteServiceImpl implements RouteService {
         // ===== CREATE REVERSE STATIONS =====
         if (reverseRoute != null) {
 
-            List<StationOrderRequest> reversedList = new ArrayList<>(request.getStations());
-            Collections.reverse(reversedList);
-
             List<RouteStation> reverseStations = new ArrayList<>();
 
-            int order = 1;
-            for (StationOrderRequest s : reversedList) {
+            for (StationOrderRequest s : request.getReverseStations()) {
 
                 Station station = stationRepository.findById(s.getStationId())
                         .orElseThrow(() -> new AppException(RouteErrorCode.STATION_NOT_FOUND));
@@ -271,7 +271,7 @@ public class RouteServiceImpl implements RouteService {
                         RouteStation.builder()
                                 .route(reverseRoute)
                                 .station(station)
-                                .stationOrder(order++)
+                                .stationOrder(s.getOrder())
                                 .build()
                 );
             }
